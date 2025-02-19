@@ -7,7 +7,12 @@ import axios from "axios";
 import InputGroup from "./components/InputGroup";
 // import ResultsPage from "./components/ResultsPage";
 // import ResultsOnlyPage from "./components/ResultsOnlyPage";
-import { BrowserRouter as Router, Routes, Route, useNavigate } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useNavigate,
+} from "react-router-dom";
 import ResultsPage from "./components/ResultsPage";
 
 const HomePage: React.FC = () => {
@@ -48,17 +53,17 @@ const HomePage: React.FC = () => {
     e.preventDefault();
     try {
       const response = await axios.post(
-        "http://localhost:5001/run_inheritance",
+        // "http://localhost:5001/run_inheritance",
+        "https://f21mp-misa.onrender.com/run_inheritance",
         formData
       );
       const resultData = response.data.result;
-      
-      // 
+
+      //
       // setResult(response.data.result);
-      
+
       // Navigate to the result page
       navigate("/result", { state: { result: resultData } });
-
     } catch (error) {
       console.error("Error:", error);
       setResult("Error calculating inheritance.");
