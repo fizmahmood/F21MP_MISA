@@ -8,7 +8,7 @@ import InputGroup from "./components/InputGroup";
 // import ResultsPage from "./components/ResultsPage";
 // import ResultsOnlyPage from "./components/ResultsOnlyPage";
 import {
-  BrowserRouter as Router,
+  HashRouter as Router,
   Routes,
   Route,
   useNavigate,
