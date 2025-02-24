@@ -1,0 +1,15 @@
+curl -X POST http://localhost:5001/store_details \
+     -H "Content-Type: application/json" \
+     -d '{
+           "father": "John Doe",
+           "mother": "Jane Doe",
+           "brothers": ["Mike", "Tom"],
+           "sisters": ["Sarah"],
+           "husband": "",
+           "wife": "Mary Doe",
+           "sons": ["David"],
+           "daughters": ["Anna"],
+           "grandsons": ["Jake"],
+           "granddaughters": ["Emma"]
+         }'
+

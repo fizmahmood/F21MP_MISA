@@ -2,7 +2,80 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import sys
 import json
+import mysql.connector
+from decimal import Decimal 
 
+
+#---------------------------------------------------------------------------------------------------------
+# DATABASE INTERACTION
+#--------------------------------------------------------------------------------------------------------
+    
+def connect_db():
+        """Establish connection to MySQL database."""
+        try:
+            connection = mysql.connector.connect(
+                host="127.0.0.1",
+                user="root",
+                password="!fg121u03",  # Update with your actual password
+                database="misa_db"
+            )
+            return connection
+        except mysql.connector.Error as err:
+            print(f"❌ Database connection error: {err}")
+            sys.exit(1)
+
+def get_user_inheritance_data(user_id):
+        """Retrieve inheritance data from the database based on user_id."""
+        connection = connect_db()
+        cursor = connection.cursor(dictionary=True)
+
+        try:
+            query = """SELECT * FROM Facts WHERE Users_user_id = %s"""
+            cursor.execute(query, (user_id,))
+            data = cursor.fetchone()
+            cursor.close()
+            connection.close()
+
+            if data:
+                return data
+            else:
+                print(f"❌ No inheritance data found for User ID: {user_id}")
+                sys.exit(1)
+
+        except mysql.connector.Error as err:
+            print(f"❌ Error fetching user data: {err}")
+            sys.exit(1)
+
+def store_results_in_db(user_id, facts_id, inheritance_system_id, results_for_db, detailed_results):
+    """Stores inheritance results in the database."""
+    connection = connect_db()
+    cursor = connection.cursor()
+
+    try:
+        json_result = json.dumps(results_for_db)  # Convert results to JSON
+        detailed_result = json.dumps(detailed_results)  # Convert detailed breakdown to JSON
+
+        query = """
+        INSERT INTO InheritanceResults (name, json_result, detailed_result, InheritanceSystem_idInheritanceSystem, Facts_id, Users_user_id)
+        VALUES (%s, %s, %s, %s, %s, %s)
+        """
+        values = ("Islamic Inheritance", json_result, detailed_result, inheritance_system_id, facts_id, user_id)
+
+        cursor.execute(query, values)
+        connection.commit()
+        print(f"✅ Inheritance results stored for user {user_id}.")
+
+    except mysql.connector.Error as err:
+        print(f"❌ Error inserting inheritance results: {err}")
+
+    finally:
+        cursor.close()
+        connection.close()
+        
+#---------------------------------------------------------------------------------------------------------
+# InheritanceSystem
+#--------------------------------------------------------------------------------------------------------
+    
 class InheritanceSystem:
     def __init__(self, net_worth, father=0, mother=0, husband=0, wife=0,
                  sons=0, daughters=0, brothers=0, sisters=0, grandsons=0, granddaughters=0, 
@@ -118,7 +191,75 @@ class InheritanceSystem:
             self.blocked_heirs['grandmother'] = "Grandmother is blocked because the mother is alive."
             self.grandmother = 0
 
+    # ----------------------------------------------------
+    # def get_results_for_db(self):
+    #     """Return inheritance distribution in a format suitable for database storage."""
+    #     results_for_db = {
+    #         "original_net_worth": self.original_net_worth,
+    #         "net_worth": self.net_worth,
+    #         "will": self.results.get("will", 0),
+    #         "total_distributed": sum(value for key, value in self.results.items() if key != "will"),
+    #         "remaining_residue": self.residue,
+    #         "heirs": [],
+    #         "blocked_heirs": self.blocked_heirs
+    #     }
+
+    #     for heir, amount in self.results.items():
+    #         if heir == "will":
+    #             continue
+
+    #         base_heir = heir.replace("each_", "")
+    #         count_attr = base_heir + "s"
+    #         count = getattr(self, count_attr, 1)
+    #         # percentage = (amount / self.original_net_worth) * 100 if self.original_net_worth > 0 else 0
+    #         percentage = (amount / float(self.original_net_worth)) * 100 if float(self.original_net_worth) > 0 else 0
+
+    #         heir_data = {
+    #             "heir": base_heir,
+    #             "count": count,
+    #             "amount": amount,
+    #             "percentage": percentage,
+    #             "explanation": self.explanations.get(heir, "No specific rule applied.")
+    #         }
+    #         results_for_db["heirs"].append(heir_data)
+
+    #     return results_for_db
+
+    def get_results_for_db(self):
+        """Return inheritance distribution in a format suitable for database storage."""
+        results_for_db = {
+            "original_net_worth": float(self.original_net_worth),  # Convert Decimal to float
+            "net_worth": float(self.net_worth),
+            "will": float(self.results.get("will", 0)),
+            "total_distributed": float(sum(value for key, value in self.results.items() if key != "will")),
+            "remaining_residue": float(self.residue),
+            "heirs": [],
+            "blocked_heirs": self.blocked_heirs
+        }
+
+        for heir, amount in self.results.items():
+            if heir == "will":
+                continue
+
+            base_heir = heir.replace("each_", "")
+            count_attr = base_heir + "s"
+            count = getattr(self, count_attr, 1)
+            percentage = (float(amount) / float(self.original_net_worth)) * 100 if self.original_net_worth > 0 else 0
+
+            heir_data = {
+                "heir": base_heir,
+                "count": count,
+                "amount": float(amount),  # Convert to float
+                "percentage": float(percentage),  # Convert to float
+                "explanation": self.explanations.get(heir, "No specific rule applied.")
+            }
+            results_for_db["heirs"].append(heir_data)
+
+        return results_for_db
+
     def display_results(self):
+        """Display inheritance distribution in a readable format with explanations."""
+        results_for_db = self.get_results_for_db()
         """Display inheritance distribution in a readable format with explanations."""
         print("\n=== Inheritance Distribution ===")
 
@@ -173,6 +314,7 @@ class InheritanceSystem:
         print(f"\nTotal Distributed: ${total_distributed:,.2f}")
         print(f"Remaining Residue: ${self.residue:,.2f}")
         print("===============================\n")
+    
 
     def _calculate_fixed_shares(self):
         """Calculate and allocate fixed shares for parents, spouses, and heirs with proportional scaling if needed."""
@@ -246,12 +388,13 @@ class InheritanceSystem:
 
         # Store adjusted fixed shares
         self.fixed_shares = fixed_shares
-        self.residue = self.net_worth - sum(fixed_shares.values())
+        # self.residue = self.net_worth - sum(fixed_shares.values())
+        self.residue = float(self.net_worth) - sum(fixed_shares.values())  # ✅ Convert net_worth to float
 
     def _allocate_fixed_share(self, heir, fraction):
         """Allocate a fixed share to an heir and return the allocated amount."""
         if getattr(self, heir, 0) > 0:
-            return self.net_worth * fraction
+            return float(self.net_worth) * fraction  # ✅ Convert to float
         return 0
 
     def _distribute_residue(self):
@@ -469,7 +612,7 @@ class InheritanceSystem:
         plt.title("Inheritance Distribution Pie Chart", fontsize=12)
         plt.axis('equal')  # Ensures a circular pie chart
         plt.show()
-
+    
         
 # ------------------ Example Usage ------------------
 # net_worth = 1000000  # Estate value
@@ -488,30 +631,147 @@ class InheritanceSystem:
 #------------------------------------------------------ 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print("Usage: python Islamic_RBS.py <json_data>")
+        print("Usage: python Islamic_RBS.py <user_id>")
         sys.exit(1)
 
-    json_data = sys.argv[1]
-    data = json.loads(json_data)
+    user_id = sys.argv[1]
+    # user_id = 2
 
-    net_worth = data.get("net_worth", 0)
+    # Fetch user facts
+    connection = connect_db()
+    cursor = connection.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM Facts WHERE Users_user_id = %s", (user_id,))
+    user_data = cursor.fetchone()
+    cursor.close()
+    connection.close()
+
+    if not user_data:
+        print(f"❌ No facts found for user {user_id}")
+        sys.exit(1)
+
+    # Extract `facts_id`
+    facts_id = user_data["facts_id"]
+
+    # Find InheritanceSystem ID (Islamic System)
+    connection = connect_db()
+    cursor = connection.cursor()
+    cursor.execute("SELECT idInheritanceSystem FROM InheritanceSystem WHERE system_name = %s", ("Islamic Inheritance",))
+    inheritance_system_data = cursor.fetchone()
+    cursor.close()
+    connection.close()
+
+    if not inheritance_system_data:
+        print(f"❌ No matching inheritance system found.")
+        sys.exit(1)
+
+    inheritance_system_id = inheritance_system_data[0]
+
+    # Run Inheritance Calculation
     inheritance_system = InheritanceSystem(
-        net_worth=net_worth,
-        will=data.get("will", 0),
-        father=data.get("father", 0),
-        mother=data.get("mother", 0),
-        husband=data.get("husband", 0),
-        wife=data.get("wife", 0),
-        sons=data.get("sons", 0),
-        daughters=data.get("daughters", 0),
-        brothers=data.get("brothers", 0),
-        sisters=data.get("sisters", 0),
-        grandsons=data.get("grandsons", 0),
-        granddaughters=data.get("granddaughters", 0),
-        grandfather=data.get("grandfather", 0),
-        grandmother=data.get("grandmother", 0)
+        net_worth=float(user_data.get("networth", 0)),  # Convert Decimal to float
+        will=float(user_data.get("will_amount", 0)),
+        father=user_data.get("father", 0),
+        mother=user_data.get("mother", 0),
+        husband=user_data.get("husband", 0),
+        wife=user_data.get("wife", 0),
+        sons=user_data.get("sons", 0),
+        daughters=user_data.get("daughters", 0),
+        brothers=user_data.get("brothers", 0),
+        sisters=user_data.get("sisters", 0),
+        grandsons=user_data.get("grandsons", 0),
+        granddaughters=user_data.get("granddaughters", 0),
+        grandfather=user_data.get("paternal_grandfather", 0),
+        grandmother=user_data.get("paternal_grandmother", 0)
     )
 
-    # Compute inheritance and return results as JSON
     inheritance_results = inheritance_system.compute_inheritance()
-    print(json.dumps(inheritance_results))
+    # inheritance_results = inheritance_system.compute_inheritance()
+    json_result = json.dumps(inheritance_results)
+    results_for_db = inheritance_system.get_results_for_db()
+
+    # Store Results in the Database
+    store_results_in_db(user_id, facts_id, inheritance_system_id, json_result, results_for_db)
+    
+    # Print JSON Output for Debugging
+    # print("==========================================")
+    # print(json_result)
+    # print("==========================================")
+    # print(json.dumps(results_for_db, indent=4))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    # # if len(sys.argv) != 2:
+    # #     print("Usage: python Islamic_RBS.py <user_id>")
+    # #     sys.exit(1)
+
+    # # user_id = sys.argv[1]
+    # user_id = 2
+
+    # # Fetch inheritance data from database
+    # data = get_user_inheritance_data(user_id)
+
+    # # Initialize the inheritance system using fetched data
+    # inheritance_system = InheritanceSystem(
+    #     net_worth=data.get("networth", 0),
+    #     will=data.get("will_amount", 0),
+    #     father=data.get("father", 0),
+    #     mother=data.get("mother", 0),
+    #     husband=data.get("husband", 0),
+    #     wife=data.get("wife", 0),
+    #     sons=data.get("sons", 0),
+    #     daughters=data.get("daughters", 0),
+    #     brothers=data.get("brothers", 0),
+    #     sisters=data.get("sisters", 0),
+    #     grandsons=data.get("grandsons", 0),
+    #     granddaughters=data.get("granddaughters", 0),
+    #     grandfather=data.get("paternal_grandfather", 0),
+    #     grandmother=data.get("paternal_grandmother", 0)
+    # )
+
+    # # Compute inheritance
+    # inheritance_results = inheritance_system.compute_inheritance()
+    # results_for_db = inheritance_system.get_results_for_db()
+
+    # # Output results as JSON
+    # print(json.dumps(results_for_db))
+   
+    # if len(sys.argv) != 2:
+    #     print("Usage: python Islamic_RBS.py <json_data>")
+    #     sys.exit(1)
+
+    # json_data = sys.argv[1]
+    # data = json.loads(json_data)
+
+    # net_worth = data.get("net_worth", 0)
+    # inheritance_system = InheritanceSystem(
+    #     net_worth=net_worth,
+    #     will=data.get("will", 0),
+    #     father=data.get("father", 0),
+    #     mother=data.get("mother", 0),
+    #     husband=data.get("husband", 0),
+    #     wife=data.get("wife", 0),
+    #     sons=data.get("sons", 0),
+    #     daughters=data.get("daughters", 0),
+    #     brothers=data.get("brothers", 0),
+    #     sisters=data.get("sisters", 0),
+    #     grandsons=data.get("grandsons", 0),
+    #     granddaughters=data.get("granddaughters", 0),
+    #     grandfather=data.get("grandfather", 0),
+    #     grandmother=data.get("grandmother", 0)
+    # )
+
+    # # Compute inheritance and return results as JSON
+    # inheritance_results = inheritance_system.compute_inheritance()
+    # print(json.dumps(inheritance_results))
