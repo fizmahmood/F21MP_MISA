@@ -354,11 +354,31 @@ async def share_inheritance(data: dict):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
-@app.post("/get_all_results/{Users_user_id}")
-async def get_all_results(data: dict):
+@app.get("/get_all_results/{Users_user_id}")
+async def get_all_results(Users_user_id: int):
     """
     Retrieve all inheritance results for the user from the database.
     """
+    try:
+        connection = connect_db()
+        cursor = connection.cursor(dictionary=True)  # ✅ Return results as dictionary
+
+        query = """SELECT * FROM InheritanceResults WHERE Users_user_id = %s"""
+        cursor.execute(query, (Users_user_id,))
+        results = cursor.fetchall()  # ✅ Fetch all results for the user
+
+        cursor.close()
+        connection.close()
+
+        if not results:
+            raise HTTPException(status_code=404, detail="No results found for this user")
+
+        return {"success": True, "results": results}
+
+    except Exception as e:
+        logging.error(f"❌ Error retrieving results: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 
 # Run the FastAPI app with Uvicorn
