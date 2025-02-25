@@ -693,9 +693,15 @@ if __name__ == "__main__":
     # inheritance_results = inheritance_system.compute_inheritance()
     json_result = json.dumps(inheritance_results)
     results_for_db = inheritance_system.get_results_for_db()
+    
+    output = {
+        "json_result": json_result,
+        "results_for_db": results_for_db
+    }
+    print(json.dumps(output))
 
     # Store Results in the Database
-    store_results_in_db(user_id, facts_id, inheritance_system_id, json_result, results_for_db)
+    # store_results_in_db(user_id, facts_id, inheritance_system_id, json_result, results_for_db)
     
     # Print JSON Output for Debugging
     # print("==========================================")

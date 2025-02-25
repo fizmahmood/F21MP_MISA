@@ -103,12 +103,18 @@ def execute_script_from_db(user_id, system_name):
 
         if result.returncode != 0:
             raise Exception(f"Error executing script: {result.stderr}")
+        
+        output_data = json.loads(result.stdout.strip())
 
-        return json.loads(result.stdout)  # Convert script output to JSON
+        json_result = output_data.get("json_result", "{}") 
+        results_for_db = output_data.get("results_for_db", {})
+
+
+        # return json.loads(result.stdout)  # Convert script output to JSON
+        return json_result, results_for_db
 
     except Exception as e:
         raise Exception(f"Script execution failed: {str(e)}")
-#=========================================================================================================
 
 #---------------------------------------------------------------------------------------------------------
 # API ROUTES
@@ -314,14 +320,46 @@ async def share_inheritance(data: dict):
             raise HTTPException(status_code=400, detail="Missing user_id")
 
         # Execute the script stored in the database
-        result = execute_script_from_db(user_id, system_name)
+        json_result,results_for_db = execute_script_from_db(user_id, system_name)
 
-        return {"success": True, "result": result}
+        # Store results in the db
+        connection = connect_db()
+        cursor = connection.cursor()
+
+        # json_result = json.dumps(results_for_db)
+        detailed_result = json.dumps(results_for_db)
+
+        query = """
+        INSERT INTO InheritanceResults (name, json_result, detailed_result, InheritanceSystem_idInheritanceSystem, Facts_id, Users_user_id)
+        VALUES (%s, %s, %s, %s, %s, %s)
+        ON DUPLICATE KEY UPDATE
+            json_result = VALUES(json_result),
+            detailed_result = VALUES(detailed_result),
+            
+            Facts_id = VALUES(Facts_id)
+        """
+        # InheritanceSystem_idInheritanceSystem = VALUES(InheritanceSystem_idInheritanceSystem),
+        values = (system_name, json_result, detailed_result, data.get("InheritanceSystem_id"), data.get("Facts_id"), user_id)
+
+        cursor.execute(query, values)
+        connection.commit()
+        connection.close()
+
+
+        return {"success": True,
+                 "json_result": json.loads(json_result),
+                 "results_for_db": results_for_db
+                 }
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
-#Fetch data from database
+@app.post("/get_all_results/{Users_user_id}")
+async def get_all_results(data: dict):
+    """
+    Retrieve all inheritance results for the user from the database.
+    """
+
 
 # Run the FastAPI app with Uvicorn
 if __name__ == "__main__":
