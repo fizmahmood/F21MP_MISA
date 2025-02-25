@@ -4,6 +4,8 @@ import subprocess
 import json
 import mysql.connector
 import logging
+import sys
+import os
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -22,8 +24,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Database connection
-# Localhost
 def connect_db():
     try:
         connection = mysql.connector.connect(
@@ -45,6 +45,76 @@ def connect_db():
     # )
     # return connection
 
+
+#---------------------------------------------------------------------------------------------------------
+# HELPER FUNCTIONS
+#--------------------------------------------------------------------------------------------------------
+def get_script_from_db(system_name):
+    """Fetch the Python script from the database based on system_name."""
+    connection = connect_db()
+    cursor = connection.cursor()
+
+    try:
+        query = "SELECT system_script FROM InheritanceSystem WHERE system_name = %s"
+        cursor.execute(query, (system_name,))
+        result = cursor.fetchone()
+        cursor.close()
+        connection.close()
+
+        if result and result[0]:
+            logging.info(f"✅ Retrieved script for {system_name}: {result[0][:100]}...") 
+            return result[0]  # The script content
+        else:
+            logging.warning(f"❌ No script found for system: {system_name}")
+            raise Exception(f"No script found for system: {system_name}")
+
+    except mysql.connector.Error as err:
+        logging.error(f"❌ Error fetching script: {err}")
+        raise Exception(f"Error fetching script: {err}")
+
+def execute_script_from_db(user_id, system_name):
+    """Fetch and execute the inheritance script for the given user."""
+    try:
+        # Retrieve the script from the database
+        script_content = get_script_from_db(system_name)
+        # logging.info("Script Content:",script_content)
+
+        # Write script to a temporary file
+        script_filename = f"temp_{system_name.replace(' ', '_')}.py"
+        with open(script_filename, "w", encoding="utf-8") as script_file:
+            script_file.write(script_content)
+
+        # Execute the script and pass the user_id as an argument
+        # result = subprocess.run(
+        #     ["python3", script_filename, str(user_id)],
+        #     capture_output=True,
+        #     text=True
+        # )
+        result = subprocess.run(
+            [sys.executable, script_filename, str(user_id)],  # ✅ Works on all OS
+            capture_output=True,text=True
+            )
+        
+        # logging.error(f"🔴 Script execution failed: {result.stderr.strip()}")  # ✅ Log error details
+
+
+        # Cleanup: Remove the temporary script file
+        os.remove(script_filename)
+
+        if result.returncode != 0:
+            raise Exception(f"Error executing script: {result.stderr}")
+
+        return json.loads(result.stdout)  # Convert script output to JSON
+
+    except Exception as e:
+        raise Exception(f"Script execution failed: {str(e)}")
+#=========================================================================================================
+
+#---------------------------------------------------------------------------------------------------------
+# API ROUTES
+#--------------------------------------------------------------------------------------------------------
+
+#= USER ==================================================================================================
 # Store user data in database
 @app.post("/generate_user")
 async def generate_user(data: dict):
@@ -109,70 +179,8 @@ async def get_user(uuid: str):
         logging.error(f"❌ Error retrieving user: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))        
 
+#= FACTS ==================================================================================================
 
-# Store beneficiary data in database
-# @app.post("/store_details")
-# async def store_details(data: dict):
-#     """
-#     Receives input from the frontend, stores it in the database, and returns the results.
-#     """
-#     try:
-#         connection = connect_db()
-#         cursor = connection.cursor()
-
-#         logging.info(f"Received data: {data}")
-#         if "Users_user_id" not in data or data["Users_user_id"] is None:
-#             logging.error("❌ Error: Users_user_id is missing or None!")
-#             raise HTTPException(status_code=400, detail="Users_user_id is required.")
-#         if "networth" not in data or data["networth"] is None:
-#             logging.error("❌ Error: networth is missing or None!")
-#             raise HTTPException(status_code=400, detail="networth is required.")
-        
-#         query1 =""" 
-#         INSERT INTO Facts 
-#         (father, mother, brothers, sisters, husband, wife, sons, daughters, grandsons, granddaughters,
-#           Users_user_id, paternal_grandfather, paternal_grandmother,maternal_grandfather,
-#           maternal_grandmother,will_amount,networth)
-#         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s, %s, %s, %s, %s, %s)"""
-
-#         # 
-#         logging.info(f"Query: {query1}")
-#         logging.info("Query values: %s", (data['father'], data['mother'], data['brothers'], data['sisters'], 
-#                                   data['husband'], data['wife'], data['sons'], data['daughters'], 
-#                                   data['grandsons'], data['granddaughters'], data['Users_user_id'],
-#                                   data['networth'],data['will_amount'],data['paternal_grandfather'],data['paternal_grandmother']
-#                                   ,data['maternal_grandfather'],data['maternal_grandmother']))
-
-#         # Insert beneficiary data into the database
-#         cursor.execute(query1, (data["father"], data["mother"], data["brothers"], data["sisters"], 
-#                                data["husband"], data["wife"], data["sons"], data["daughters"], 
-#                                data["grandsons"], data["granddaughters"], data["Users_user_id"],
-#                                data['networth'],data['will_amount'],data['paternal_grandfather'],data['paternal_grandmother']
-#                                   ,data['maternal_grandfather'],data['maternal_grandmother']))
-        
-#         # get the last inserted id for beneficiary
-#         # beneficiary_id = cursor.lastrowid
-
-#         #Insert Financial data into the database
-#         # query2 = """
-#         # INSERT INTO finances
-#         # (Users_user_id,networth,will_amount)
-#         # VALUES (%s, %s, %s)
-#         # """
-
-#         # # 
-#         # logging.info(f"Executing Financial Data Query: {query2}")
-#         # logging.info(f"Query Values: {(data['Users_user_id'], data['networth'], data['will_amount'])}")
-
-
-#         # cursor.execute(query2, (data["Users_user_id"], data["networth"], data["will_amount"]))
-
-#         connection.commit()
-#         connection.close()
-#         logging.info("Data stored successfully into table")
-#         return {"success": True, "message": "Data stored successfully"}
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=str(e))
 @app.post("/store_details")
 async def store_details(data: dict):
     """
@@ -269,6 +277,8 @@ async def get_facts(Users_user_id: int):
     except Exception as e:
         logging.error(f"❌ Error retrieving user: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))   
+
+#= INHERITANCE ===========================================================================================
      
 @app.post("/run_inheritance")
 async def run_inheritance(data: dict):
@@ -291,12 +301,43 @@ async def run_inheritance(data: dict):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
+@app.post("/share_inheritance")
+async def share_inheritance(data: dict):
+    """
+    Runs an inheritance script stored in the database based on system_name.
+    """
+    try:
+        user_id = data.get("user_id")
+        system_name = data.get("system_name", "Islamic Inheritance")  # Default to Islamic
+
+        if not user_id:
+            raise HTTPException(status_code=400, detail="Missing user_id")
+
+        # Execute the script stored in the database
+        result = execute_script_from_db(user_id, system_name)
+
+        return {"success": True, "result": result}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
 #Fetch data from database
 
 # Run the FastAPI app with Uvicorn
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=5001, reload=True)
+
+
+
+
+
+
+
+
+
+
+
 
 
 

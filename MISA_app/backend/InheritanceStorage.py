@@ -92,6 +92,6 @@ if __name__ == "__main__":
         print(f"❌ Error: File '{file_path}' does not exist! Please check the filename and try again.")
     
     # Delete script 
-    delete_choice = input(f"Do you want to delete '{file_name}' from the system? (yes/no): ").strip().lower()
-    if delete_choice == "yes":
-        delete_script_file(file_name)
+    # delete_choice = input(f"Do you want to delete '{file_name}' from the system? (yes/no): ").strip().lower()
+    # if delete_choice == "yes":
+    #     delete_script_file(file_name)
