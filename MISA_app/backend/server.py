@@ -335,7 +335,6 @@ async def share_inheritance(data: dict):
         ON DUPLICATE KEY UPDATE
             json_result = VALUES(json_result),
             detailed_result = VALUES(detailed_result),
-            
             Facts_id = VALUES(Facts_id)
         """
         # InheritanceSystem_idInheritanceSystem = VALUES(InheritanceSystem_idInheritanceSystem),

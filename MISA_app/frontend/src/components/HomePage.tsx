@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 // import { Button, Form } from "react-bootstrap";
-import FormFacts from "./FormFacts";
+//import FormFacts from "./FormFacts";
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
@@ -31,6 +31,7 @@ const HomePage: React.FC = () => {
             uuid: userData.uuid,
             idUser: userData.idUser || 0, // Ensure correct key is used
           });
+          console.log(user);
         } else {
           console.warn("User not found");
           navigate("/welcome");
@@ -47,17 +48,79 @@ const HomePage: React.FC = () => {
 
   return (
     <>
-    <div className="container mt-4">
-      <h2>Welcome Back</h2>
-      <p>Your User ID: {user?.idUser}</p>
-      <p>UUID: {user?.uuid}</p>
-      {/* Add Home Page Content Here */}
-    </div>
-    <div>
-    <FormFacts />
-    </div>
+      <nav className="navbar navbar-expand-lg bg-body-tertiary">
+        <div className="container-fluid">
+          <a className="navbar-brand" href="#">
+            Navbar
+          </a>
+          <button
+            className="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarNav"
+            aria-controls="navbarNav"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
+            <span className="navbar-toggler-icon"></span>
+          </button>
+          <div className="collapse navbar-collapse" id="navbarNav">
+            <ul className="navbar-nav">
+              <li className="nav-item">
+                <a className="nav-link active" aria-current="page" href="#">
+                  Home
+                </a>
+              </li>
+              <li className="nav-item">
+                <a className="nav-link" href="#">
+                  Features
+                </a>
+              </li>
+              <li className="nav-item">
+                <a className="nav-link" href="#">
+                  Pricing
+                </a>
+              </li>
+              <li className="nav-item">
+                <a className="nav-link disabled" aria-disabled="true">
+                  Disabled
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+      <div className="row">
+        <div className="col-sm-6 mb-3 mb-sm-0">
+          <div className="card">
+            <div className="card-body">
+              <h5 className="card-title">Special title treatment</h5>
+              <p className="card-text">
+                With supporting text below as a natural lead-in to additional
+                content.
+              </p>
+              <a href="#" className="btn btn-primary">
+                Go somewhere
+              </a>
+            </div>
+          </div>
+        </div>
+        <div className="col-sm-6">
+          <div className="card">
+            <div className="card-body">
+              <h5 className="card-title">Special title treatment</h5>
+              <p className="card-text">
+                With supporting text below as a natural lead-in to additional
+                content.
+              </p>
+              <a href="#" className="btn btn-primary">
+                Go somewhere
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
     </>
-    
   );
 };
 
