@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Form, Container, Row, Col, Button } from "react-bootstrap";
 import axios from "axios";
 import useUserInfo from "../hooks/useUserInfo";
+import { useNavigate } from "react-router-dom";
 
 // ✅ Define the TypeScript interface for form data
 interface FormData {
@@ -52,6 +53,7 @@ export default function InheritanceForm() {
   });
 
   const userInfo = useUserInfo();
+  const navigate = useNavigate();
 
   //
   //   useEffect(() => {
@@ -176,6 +178,7 @@ export default function InheritanceForm() {
 
       // ✅ Navigate to results page with computed data
       // navigate("/result", { state: { result: resultData } });
+      navigate("/home");
     } catch (error) {
       console.error("Error:", error);
       // setResult("Error calculating inheritance.");

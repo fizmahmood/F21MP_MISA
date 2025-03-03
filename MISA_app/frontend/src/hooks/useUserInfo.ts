@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+// import axios from "axios";
+import { api } from "../api/api";
 
 interface UserInfo {
   user_id: number;
@@ -32,8 +33,7 @@ const useUserInfo = () => {
     } else if (userUUID) {
       console.warn("No 'userInfo' found in localStorage. Fetching from API...");
 
-      axios
-        .get(`http://localhost:5001/get_user/${userUUID}`)
+      api.get(`/get_user/${userUUID}`)
         .then((response) => {
           if (response.data.success) {
             const userData = response.data.user_data;

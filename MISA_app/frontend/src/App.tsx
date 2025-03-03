@@ -6,10 +6,11 @@ import {
   Navigate,
 } from "react-router-dom";
 import WelcomePage from "./components/WelcomePage";
-import HomePage from "./components/HomePage";
+import HomePage from "./components/HomePagev2";
 import ResultsPage from "./components/ResultsPage";
 import EditableForm from "./components/EditableForm";
 import InheritanceResults from "./components/InheritanceResults";
+// import FactsLoader from "./components/FactsLoader";
 
 const App: React.FC = () => {
   const userUUID = localStorage.getItem("userUUID");
@@ -23,6 +24,7 @@ const App: React.FC = () => {
         <Route path="/result" element={<ResultsPage />} />
         <Route path="/form" element={<EditableForm />} />
         <Route path="/results" element={<InheritanceResults/>}/>
+        
 
         <Route
           path="/"

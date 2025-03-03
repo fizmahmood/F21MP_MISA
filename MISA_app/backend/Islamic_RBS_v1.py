@@ -92,7 +92,7 @@ class InheritanceSystem:
         self.husband = husband
         self.wife = wife
         self.sons = sons
-        self.daughters = daughters or 0 # Default to 0 if None
+        self.daughters = daughters
         self.brothers = brothers
         self.sisters = sisters
         self.grandsons = grandsons
@@ -359,12 +359,12 @@ class InheritanceSystem:
                 fixed_shares['wife'] = self._allocate_fixed_share('wife', 1 / 4)
 
         # Daughters (Only if no sons)
-        if self.daughters > 0 and not self.sons:
+        if self.daughters and not self.sons:
             if self.daughters == 1:
                 fixed_shares['daughters'] = self._allocate_fixed_share('daughters', 1 / 2)
             else:
                 fixed_shares['daughters'] = self._allocate_fixed_share('daughters', 2 / 3)
-                self.results['each_daughter'] = fixed_shares['daughters'] / self.daughters
+                self.results['each_daughter'] = self.fixed_shares['daughters'] / self.daughters
 
         # Granddaughters (Only if no grandsons, no sons, and no daughters)
         if self.granddaughters and not self.grandsons and not self.sons and not self.daughters:

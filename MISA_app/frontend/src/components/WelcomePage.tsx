@@ -1,15 +1,15 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 import FormFacts from "./FormFacts";
 import UserDataLoader from "./UserDataLoader";
 
 const WelcomePage: React.FC = () => {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
 
-  const handleContinue = () => {
-    navigate("/home"); // Redirect to the main application
-  };
+  // const handleContinue = () => {
+  //   navigate("/home"); // Redirect to the main application
+  // };
 
   return (
     <div className="container text-center mt-5">
@@ -21,9 +21,6 @@ const WelcomePage: React.FC = () => {
         Kindly fill the form and start exploring inheritance laws and customs.
       </p>
         <FormFacts />
-      <button className="btn btn-primary" onClick={handleContinue}>
-        Continue
-      </button>
     </div>
   );
 };

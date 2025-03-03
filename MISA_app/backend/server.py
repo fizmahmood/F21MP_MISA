@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 import subprocess
 import json
@@ -90,6 +90,7 @@ def execute_script_from_db(user_id, system_name):
         #     capture_output=True,
         #     text=True
         # )
+        logging.info(f"🔍 Running script {script_filename} for user {user_id}")
         result = subprocess.run(
             [sys.executable, script_filename, str(user_id)],  # ✅ Works on all OS
             capture_output=True,text=True
@@ -102,8 +103,10 @@ def execute_script_from_db(user_id, system_name):
         os.remove(script_filename)
 
         if result.returncode != 0:
+            logging.error(f"❌ Script execution failed: {result.stderr.strip()}")
             raise Exception(f"Error executing script: {result.stderr}")
         
+        logging.info(f"✅ Script execution output: {result.stdout.strip()}")
         output_data = json.loads(result.stdout.strip())
 
         json_result = output_data.get("json_result", "{}") 
@@ -114,6 +117,7 @@ def execute_script_from_db(user_id, system_name):
         return json_result, results_for_db
 
     except Exception as e:
+        logging.error(f"❌ Script execution failed: {str(e)}")
         raise Exception(f"Script execution failed: {str(e)}")
 
 #---------------------------------------------------------------------------------------------------------
@@ -186,6 +190,26 @@ async def get_user(uuid: str):
         raise HTTPException(status_code=500, detail=str(e))        
 
 #= FACTS ==================================================================================================
+from pydantic import BaseModel
+
+# ✅ Define Pydantic Model for UserFacts
+class UserFacts(BaseModel):
+    father: int
+    mother: int
+    brothers: int
+    sisters: int
+    husband: int
+    wife: int
+    sons: int
+    daughters: int
+    grandsons: int
+    granddaughters: int
+    paternal_grandfather: int
+    paternal_grandmother: int
+    maternal_grandfather: int
+    maternal_grandmother: int
+    will_amount: float
+    networth: float
 
 @app.post("/store_details")
 async def store_details(data: dict):
@@ -283,6 +307,75 @@ async def get_facts(Users_user_id: int):
     except Exception as e:
         logging.error(f"❌ Error retrieving user: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))   
+    
+@app.get("/get_facts_id/{Users_user_id}")
+async def get_facts_id(Users_user_id: int):
+    """
+    Retrieves facts from the db based on user_id fk.
+    """ 
+    try:
+        connection = connect_db()
+        cursor = connection.cursor(dictionary=True)  # ✅ Ensures dict format
+        query = """SELECT facts_id FROM Facts WHERE Users_user_id = %s"""
+        cursor.execute(query, (Users_user_id,))
+        factid = cursor.fetchone()
+        cursor.close()
+        connection.close() 
+
+        if factid:
+            logging.info(f"🔍 User facts fetched: {factid}")
+            return {"success": True, "Fact ID": factid}  # ✅ Ensure correct response format
+        else:
+            logging.warning("❌ Facts not found in database.")
+            raise HTTPException(status_code=404, detail="Facts not found")
+
+    except Exception as e:
+        logging.error(f"❌ Error retrieving user: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))     
+    
+@app.put("/update_facts/{user_id}")
+async def update_facts(user_id: int, facts: UserFacts):
+    try:
+        connection = connect_db()
+        cursor = connection.cursor(dictionary=True)
+
+        # ✅ Check if User Facts Exist
+        cursor.execute("SELECT * FROM facts WHERE Users_user_id = %s", (user_id,))
+        existing_facts = cursor.fetchone()
+
+        if not existing_facts:
+            raise HTTPException(status_code=404, detail="User facts not found")
+
+        # ✅ Update Facts in Database
+        query = """
+        UPDATE facts SET father=%s, mother=%s, brothers=%s, sisters=%s, 
+        husband=%s, wife=%s, sons=%s, daughters=%s, grandsons=%s, 
+        granddaughters=%s, paternal_grandfather=%s, paternal_grandmother=%s,
+        maternal_grandfather=%s, maternal_grandmother=%s, will_amount=%s, 
+        networth=%s WHERE Users_user_id=%s
+        """
+        values = (
+            facts.father, facts.mother, facts.brothers, facts.sisters,
+            facts.husband, facts.wife, facts.sons, facts.daughters, 
+            facts.grandsons, facts.granddaughters, facts.paternal_grandfather, 
+            facts.paternal_grandmother, facts.maternal_grandfather, 
+            facts.maternal_grandmother, facts.will_amount, facts.networth, user_id
+        )
+
+        cursor.execute(query, values)
+        connection.commit()
+
+        # ✅ Retrieve and Return Updated Facts
+        cursor.execute("SELECT * FROM facts WHERE Users_user_id = %s", (user_id,))
+        updated_facts = cursor.fetchone()
+        connection.close()
+
+        logging.info(f"Updated facts for user {user_id}: {updated_facts}")
+        return {"success": True, "updatedFacts": updated_facts}
+
+    except Exception as e:
+        logging.error(f"Error updating facts: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 #= INHERITANCE ===========================================================================================
      
@@ -306,7 +399,62 @@ async def run_inheritance(data: dict):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-    
+# @app.get("/get_system") 
+# async def get_system(system_name: str):
+#     """
+#     Retrieves the inheritance system script from the database.
+#     """
+#     try:
+#         logging.info(f"Fetching system details for: {system_name}")
+
+#         connection = connect_db()
+#         cursor = connection.cursor(dictionary=True)
+
+#         query = "SELECT idInheritanceSystem, system_name FROM InheritanceSystem WHERE system_name = %s"
+#         cursor.execute(query, (system_name,))
+#         result = cursor.fetchone()
+
+#         cursor.close()
+#         connection.close()
+
+#         if result and result[0]:
+#             return {"success": True, "system_script": result[0]}
+#         else:
+#             raise HTTPException(status_code=404, detail="System not found")
+
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/get_system")
+async def get_system(system_name: str = Query(..., title="System Name")):
+    """
+    Retrieves the inheritance system details based on system_name (using query parameters).
+    """
+    try:
+        logging.info(f"Fetching system details for: {system_name}")
+
+        connection = connect_db()
+        cursor = connection.cursor(dictionary=True)
+
+        query = "SELECT idInheritanceSystem, system_name FROM InheritanceSystem WHERE system_name = %s"
+        cursor.execute(query, (system_name,))
+        system_data = cursor.fetchone()
+        connection.close()
+
+        if not system_data:
+            logging.warning(f"System '{system_name}' not found in database.")
+            raise HTTPException(status_code=404, detail="System not found")
+
+        logging.info(f"System details found: {system_data}")
+        return {"success": True, "system": system_data}
+
+    except mysql.connector.Error as err:
+        logging.error(f"Database error: {str(err)}")
+        raise HTTPException(status_code=500, detail=f"Database error: {str(err)}")
+    except Exception as e:
+        logging.error(f"Error retrieving system: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error retrieving system: {str(e)}")
+       
 @app.post("/share_inheritance")
 async def share_inheritance(data: dict):
     """
@@ -314,8 +462,8 @@ async def share_inheritance(data: dict):
     """
     try:
         user_id = data.get("user_id")
-        system_name = data.get("system_name", "Islamic Inheritance")  # Default to Islamic
-
+        system_name = data.get("system_name")  # Default to Islamic data.get("system_name", "Islamic Inheritance")
+        logging.info(f"Running inheritance script for user {user_id} using system: {system_name}")
         if not user_id:
             raise HTTPException(status_code=400, detail="Missing user_id")
 
@@ -329,17 +477,24 @@ async def share_inheritance(data: dict):
         # json_result = json.dumps(results_for_db)
         detailed_result = json.dumps(results_for_db)
 
+        # query = """
+        # INSERT INTO InheritanceResults (name, json_result, detailed_result, InheritanceSystem_idInheritanceSystem, Facts_id, Users_user_id)
+        # VALUES (%s, %s, %s, %s, %s, %s)
+        # ON DUPLICATE KEY UPDATE
+        #     json_result = VALUES(json_result),
+        #     detailed_result = VALUES(detailed_result),
+        #     Facts_id = VALUES(Facts_id)
+        # """
         query = """
         INSERT INTO InheritanceResults (name, json_result, detailed_result, InheritanceSystem_idInheritanceSystem, Facts_id, Users_user_id)
         VALUES (%s, %s, %s, %s, %s, %s)
         ON DUPLICATE KEY UPDATE
-            json_result = VALUES(json_result),
-            detailed_result = VALUES(detailed_result),
-            Facts_id = VALUES(Facts_id)
-        """
+        json_result = VALUES(json_result),
+        detailed_result = VALUES(detailed_result);
+        """    
         # InheritanceSystem_idInheritanceSystem = VALUES(InheritanceSystem_idInheritanceSystem),
         values = (system_name, json_result, detailed_result, data.get("InheritanceSystem_id"), data.get("Facts_id"), user_id)
-
+        logging.info(f"Values: {values}")
         cursor.execute(query, values)
         connection.commit()
         connection.close()
@@ -351,6 +506,7 @@ async def share_inheritance(data: dict):
                  }
 
     except Exception as e:
+        logging.error(f"❌ Error in share_inheritance: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
     
 @app.get("/get_all_results/{Users_user_id}")

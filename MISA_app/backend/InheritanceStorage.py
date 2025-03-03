@@ -92,6 +92,32 @@ if __name__ == "__main__":
         print(f"❌ Error: File '{file_path}' does not exist! Please check the filename and try again.")
     
     # Delete script 
-    # delete_choice = input(f"Do you want to delete '{file_name}' from the system? (yes/no): ").strip().lower()
-    # if delete_choice == "yes":
+    delete_choice = input(f"Do you want to delete '{file_name}' from the system? (yes/no): ").strip().lower()
+    if delete_choice == "yes":
+        delete_script_file(file_name)
+
+
+    # print("\n📂 Script Management System")
+    # print("1. Store a script in the database")
+    # print("2. Delete a script from the system")
+    
+    # while True:
+    #     choice = input("\nEnter your choice (1 or 2): ").strip()
+    #     if choice in ["1", "2"]:
+    #         break
+    #     else:
+    #         print("❌ Invalid choice! Please enter 1 or 2.")
+
+    # if choice == "1":
+    #     file_name = input("Enter the script filename (e.g., Islamic_RBS.py): ").strip()
+    #     system_name = input("Enter the system name (e.g., Islamic Rule-Based System): ").strip()
+    #     file_path = os.path.join(os.getcwd(), file_name)
+
+    #     if os.path.exists(file_path):
+    #         store_script(file_path, system_name)
+    #     else:
+    #         print(f"❌ Error: File '{file_name}' does not exist! Please check the filename and try again.")
+
+    # elif choice == "2":
+    #     file_name = input("Enter the script filename to delete (e.g., Islamic_RBS.py): ").strip()
     #     delete_script_file(file_name)
