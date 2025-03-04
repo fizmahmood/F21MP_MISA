@@ -475,6 +475,7 @@ async def share_inheritance(data: dict):
         cursor = connection.cursor()
 
         # json_result = json.dumps(results_for_db)
+        json_result = json.dumps(json_result)
         detailed_result = json.dumps(results_for_db)
 
         # query = """

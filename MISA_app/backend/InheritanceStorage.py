@@ -102,7 +102,7 @@ if __name__ == "__main__":
     # print("2. Delete a script from the system")
     
     # while True:
-    #     choice = input("\nEnter your choice (1 or 2): ").strip()
+    #     choice = input("\nEnHiter your choice (1 or 2): ").strip()
     #     if choice in ["1", "2"]:
     #         break
     #     else:

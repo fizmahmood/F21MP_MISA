@@ -381,11 +381,7 @@ const HomePage: React.FC = () => {
                 followed in India.
               </p>
               <button
-                onClick={() =>
-                  setSystemName({
-                    idInheritanceSystem: 2,
-                    system_name: "Hindu Inheritance",
-                  })
+                onClick={() => handleGenerateResults("Hindu Inheritance")
                 }
                 className="btn btn-primary"
               >
