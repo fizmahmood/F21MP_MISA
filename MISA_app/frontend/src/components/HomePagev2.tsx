@@ -391,6 +391,25 @@ const HomePage: React.FC = () => {
           </div>
         </div>
       </div>
+      <div className="col-sm-6">
+          <div className="card">
+            <div className="card-body">
+              <h5 className="card-title">India Inheritance System</h5>
+              <p className="card-text">
+                This system calculates inheritance using India legal framework this is applied 
+                for religions other than Hindu and Muslim and also for those who do not follow any religion.
+              </p>
+              <button
+                onClick={() => handleGenerateResults("India Inheritance")
+                }
+                className="btn btn-primary"
+              >
+                Generate results
+              </button>
+            </div>
+          </div>
+        </div>
+      
     </>
   );
 };

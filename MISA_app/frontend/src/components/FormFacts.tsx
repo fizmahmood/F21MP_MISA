@@ -236,7 +236,7 @@ export default function InheritanceForm() {
                   required
                 />
               </Form.Group>
-
+              
               {/* Parents */}
               <Form.Group>
                 <Form.Label>Is Father Alive?</Form.Label>
