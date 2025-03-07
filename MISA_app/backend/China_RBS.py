@@ -75,6 +75,9 @@ def store_results_in_db(user_id, facts_id, inheritance_system_id, results_for_db
     finally:
         cursor.close()
         connection.close()
+#---------------------------------------------------------------------------------------------------------
+# Inheritance System
+#--------------------------------------------------------------------------------------------------------
 
 class InheritanceSystem:
     def __init__(self, net_worth, father=0, mother=0, husband=0, wife=0,
@@ -151,12 +154,19 @@ class InheritanceSystem:
             "blocked_heirs": {}
         }
 
+        # direct_heirs = {"father", "mother", "husband", "wife", "paternal_grandfather",
+        #             "paternal_grandmother", "maternal_grandfather", "maternal_grandmother"}
+
+
+
         # ✅ Step 1: Process Heirs
         for heir, amount in self.results.items():
             if heir == "will":
                 continue  # Skip will from direct heir listing
 
             base_heir = heir.replace("each_", "")  # Ensure correct heir label
+            # base_heir = heir.replace("each_", "") if base_heir in direct_heirs else heir
+
 
             # ✅ Fetch correct count for heirs (Handles singular/plural)
             count_attr = f"{base_heir}s" if f"{base_heir}s" in vars(self) else base_heir
@@ -181,18 +191,63 @@ class InheritanceSystem:
 
         return results_for_db
 
-    # ---------------- HELPER METHODS ----------------
+    # def get_results_for_db(self):
+    #     """Return inheritance distribution in a format suitable for database storage."""
+        
+    #     results_for_db = {
+    #         "original_net_worth": float(self.original_net_worth),  # Convert Decimal to float
+    #         "net_worth": float(self.net_worth),
+    #         "will": float(self.results.get("will", 0)),  # Ensure will is included
+    #         "total_distributed": sum(value for key, value in self.results.items() if key != "will"),
+    #         "remaining_residue": float(self.residue),
+    #         "heirs": [],
+    #         "blocked_heirs": {}
+    #     }
+
+    #     # ✅ List of heirs who should **not** have "each_" prefix
+    #     direct_heirs = {"father", "mother", "husband", "wife", "paternal_grandfather",
+    #                     "paternal_grandmother", "maternal_grandfather", "maternal_grandmother"}
+
+    #     for heir, amount in self.results.items():
+    #         if heir == "will":
+    #             continue  # Skip will from direct heir listing
+
+    #         # ✅ First, assign base_heir properly
+    #         base_heir = heir.replace("each_", "")  # Strip "each_" prefix for all heirs
+
+    #         # ✅ Then, check if it should retain "each_"
+    #         if base_heir not in direct_heirs:
+    #             base_heir = heir  # Restore "each_" for non-direct heirs
+
+    #         # ✅ Fetch correct count for heirs (Handles singular/plural)
+    #         count_attr = f"{base_heir}s" if f"{base_heir}s" in vars(self) else base_heir
+    #         count = getattr(self, count_attr, 1)  # Default to 1 if not found
+
+    #         # ✅ Calculate percentage
+    #         percentage = (float(amount) / float(self.original_net_worth)) * 100 if self.original_net_worth > 0 else 0
+
+    #         # ✅ Structure each heir's data
+    #         heir_data = {
+    #             "heir": base_heir,  # Properly formatted heir name
+    #             "count": count,
+    #             "amount": float(amount),  # Convert to float
+    #             "percentage": float(percentage),  # Convert to float
+    #             "explanation": self.explanations.get(heir, "No specific rule applied.")
+    #         }
+    #         results_for_db["heirs"].append(heir_data)
+
+    #     # ✅ Step 2: Process Blocked Heirs
+    #     for blocked_heir, reason in self.blocked_heirs.items():
+    #         results_for_db["blocked_heirs"][blocked_heir] = reason
+
+    #     return results_for_db
+
+#====================================== RULES ============================================
 
     def _apply_blocking_rules(self):
         """Apply blocking rules to remove heirs who should not inherit."""
-        if self.sons > 0 or self.daughters > 0 or self.grandsons > 0 or self.granddaughters > 0:
-            if self.father > 0:
-                self.blocked_heirs["father"] = "Father is blocked due to presence of direct descendants."
-                self.father = 0
-
-            if self.mother > 0:
-                self.blocked_heirs["mother"] = "Mother is blocked due to presence of direct descendants."
-                self.mother = 0
+        if (self.sons > 0 or self.daughters > 0 or
+             self.husband > 0 or self.wife > 0 or self.father > 0 or self.mother > 0 ):
 
             if self.paternal_grandfather > 0:
                 self.blocked_heirs["paternal_grandfather"] = "Paternal Grandfather is blocked due to presence of direct descendants."
@@ -209,62 +264,19 @@ class InheritanceSystem:
             if self.maternal_grandmother > 0:
                 self.blocked_heirs["maternal_grandmother"] = "Maternal Grandmother is blocked due to presence of direct descendants."
                 self.maternal_grandmother = 0
-        
             
             if self.brothers > 0:
                 self.blocked_heirs["brothers"] = "Brothers are blocked due to presence of direct descendants."
                 self.brothers = 0
-
+            
             if self.sisters > 0:
                 self.blocked_heirs["sisters"] = "Sisters are blocked due to presence of direct descendants."
                 self.sisters = 0
+
         
             if self.sons or self.daughters:
                 self.grandsons = 0
                 self.granddaughters = 0
-        
-        if (self.father > 0 or self.mother > 0 or self.paternal_grandfather
-            > 0 or self.paternal_grandmother > 0 or self.maternal_grandfather > 0 or self.maternal_grandmother > 0 or self.brothers > 0 or self.sisters > 0):
-            if self.father > 0:
-                if self.mother > 0:
-                    self.blocked_heirs["mother"] = "Mother is blocked because of the presence of father."
-                    self.mother = 0
-                if self.brothers > 0:
-                    self.blocked_heirs["brothers"] = "Brother is blocked because of the presence of father."
-                    self.brothers = 0
-                if self.sisters > 0:
-                    self.blocked_heirs["sisters"] = "Sister is blocked because of the presence of father."
-                    self.sisters = 0
-                if self.paternal_grandfather > 0:
-                    self.blocked_heirs["paternal_grandfather"] = "Paternal Grandfather is blocked because of the presence of father."
-                    self.paternal_grandfather = 0
-                if self.paternal_grandmother > 0:
-                    self.blocked_heirs["paternal_grandmother"] = "Paternal Grandmother is blocked because of the presence of father."
-                    self.paternal_grandmother = 0
-                if self.maternal_grandfather > 0:
-                    self.blocked_heirs["maternal_grandfather"] = "Maternal Grandfather is blocked because of the presence of father."
-                    self.maternal_grandfather = 0
-                if self.maternal_grandmother > 0:
-                    self.blocked_heirs["maternal_grandmother"] = "Maternal Grandmother is blocked because of the presence of father."
-                    self.maternal_grandmother = 0
-            
-            if (self.mother or self.brothers or self.sisters):
-                if self.paternal_grandfather > 0:
-                    self.blocked_heirs["paternal_grandfather"] = "Paternal Grandfather is blocked because of the presence of mother and/or siblings."
-                    self.paternal_grandfather = 0
-                if self.paternal_grandmother > 0:
-                    self.blocked_heirs["paternal_grandmother"] = "Paternal Grandmother is blocked because of the presence of mother and/or siblings."
-                    self.paternal_grandmother = 0
-                if self.maternal_grandfather > 0:
-                    self.blocked_heirs["maternal_grandfather"] = "Maternal Grandfather is blocked because of the presence of mother and/or siblings."
-                    self.maternal_grandfather = 0
-                if self.maternal_grandmother > 0:
-                    self.blocked_heirs["maternal_grandmother"] = "Maternal Grandmother is blocked because of the presence of mother and/or siblings."
-                    self.maternal_grandmother = 0
-            
-
-
-            
 
 
         #   
@@ -283,8 +295,26 @@ class InheritanceSystem:
     def _calculate_shares(self):
         """Distribute remaining inheritance equally among all eligible heirs."""
         
-        eligible_heirs = {}
-        total_heirs = 0  # Count of all eligible heirs
+        eligible_heirs = {
+            "sons": self.sons,
+            "daughters": self.daughters,
+            "grandsons": self.grandsons,
+            "granddaughters": self.granddaughters,
+            "father": self.father,
+            "mother": self.mother,
+            "paternal_grandfather": self.paternal_grandfather,
+            "paternal_grandmother": self.paternal_grandmother,
+            "maternal_grandfather": self.maternal_grandfather,
+            "maternal_grandmother": self.maternal_grandmother,
+            "brothers": self.brothers,
+            "sisters": self.sisters,
+            "husband": self.husband,
+            "wife": self.wife
+        }
+        # total_heirs = 0  # Count of all eligible heirs
+
+        
+
 
         # ✅ Exclude non-heir attributes
         exclude_keys = {
@@ -292,71 +322,98 @@ class InheritanceSystem:
             "results", "blocked_heirs", "explanations"
         }
         
-        if self.husband > 0 and (self.sons > 0 or self.daughters > 0):
-            self.fixed_shares["husband"] = self.net_worth * 1/3
-            self.explanations["husband"] = "Husband inherits 1/3 of the estate, as there are direct descendants."
-            # self.net_worth -= self.net_worth * 1/4
+        # if self.husband > 0 and (self.sons > 0 or self.daughters > 0):
+        #     self.fixed_shares["husband"] = self.net_worth * 1/3
+        #     self.explanations["husband"] = "Husband inherits 1/3 of the estate, as there are direct descendants."
+        #     # self.net_worth -= self.net_worth * 1/4
         
-        if self.wife > 0 and (self.sons > 0 or self.daughters > 0):
-            self.fixed_shares["wife"] = self.net_worth * 1/3
-            self.explanations["wife"] = "Wife inherits 1/3 of the estate, as there are direct descendants."
-            # self.net_worth -= self.net_worth * 1/4
+        # if self.wife > 0 and (self.sons > 0 or self.daughters > 0):
+        #     self.fixed_shares["wife"] = self.net_worth * 1/3
+        #     self.explanations["wife"] = "Wife inherits 1/3 of the estate, as there are direct descendants."
+        #     # self.net_worth -= self.net_worth * 1/4
 
-        if self.husband > 0 and (self.father > 0 or self.mother > 0 or 
-                                 self.paternal_grandfather or self.paternal_grandmother or self.maternal_grandfather 
-                                 or self.maternal_grandmother):
-            self.fixed_shares["husband"] = self.net_worth * 1/2
-            self.explanations["husband"] = "Husband inherits 1/2 of the estate, as there are no direct descendants."
+        # if self.husband > 0 and (self.father > 0 or self.mother > 0 or 
+        #                          self.paternal_grandfather or self.paternal_grandmother or self.maternal_grandfather 
+        #                          or self.maternal_grandmother):
+        #     self.fixed_shares["husband"] = self.net_worth * 1/2
+        #     self.explanations["husband"] = "Husband inherits 1/2 of the estate, as there are no direct descendants."
 
-        if self.wife > 0 and (self.father > 0 or self.mother > 0 or 
-                                 self.paternal_grandfather or self.paternal_grandmother or self.maternal_grandfather 
-                                 or self.maternal_grandmother or self.brothers > 0 or self.sisters > 0):
-            self.fixed_shares["wife"] = self.net_worth * 1/2
-            self.explanations["wife"] = "Wife inherits 1/2 of the estate, as there are no direct descendants."
+        # if self.wife > 0 and (self.father > 0 or self.mother > 0 or 
+        #                          self.paternal_grandfather or self.paternal_grandmother or self.maternal_grandfather 
+        #                          or self.maternal_grandmother or self.brothers > 0 or self.sisters > 0):
+        #     self.fixed_shares["wife"] = self.net_worth * 1/2
+        #     self.explanations["wife"] = "Wife inherits 1/2 of the estate, as there are no direct descendants."
         
-        self.residue = self.net_worth - sum(self.fixed_shares.values())
+        # self.residue = self.net_worth - sum(self.fixed_shares.values())
+        # total_heirs = (self.sons + self.daughters + self.grandsons + self.granddaughters 
+        #                + self.father + self.mother + self.paternal_grandfather + self.paternal_grandmother + self.maternal_grandfather + self.maternal_grandmother + 
+        #                self.brothers + self.sisters+ self.husband + self.wife)
+        
+        # share_per_heir = self.net_worth / total_heirs
+
+        # if self.sons > 0:
+        #     self.fixed_shares["each_son"] = share_per_heir
+            
+        # if self.daughters > 0:
+        #     self.fixed_shares["each_daughter"] = share_per_heir
+        
+        # if self.grandsons > 0:
+        #     self.fixed_shares["each_grandson"] = share_per_heir
+
+        # if self.granddaughters > 0:
+        #     self.fixed_shares["each_granddaughter"] = share_per_heir
+        
+        # if self.husband > 0:
+        #     self.fixed_shares["husband"] = share_per_heir
+        
+        # if self.wife > 0:
+        #     self.fixed_shares["wife"] = share_per_heir
+        
+        # if self.brothers > 0:
+        #     self.fixed_shares["each_brother"] = share_per_heir
+        
+        # if self.sisters > 0:
+        #     self.fixed_shares["each_sister"] = share_per_heir
+
+        # Filter out heirs with zero count
+        eligible_heirs = {heir: count for heir, count in eligible_heirs.items() if count > 0}
+
+        # Total number of heirs
+        total_heirs = sum(eligible_heirs.values())
+
+        # Calculate each heir's share
+        share_per_heir = self.net_worth / total_heirs
+
+        # Distribute shares dynamically
+        for heir, count in eligible_heirs.items():
+            self.fixed_shares[f"each_{heir}"] = share_per_heir
 
 
-
-        if self.sons > 0 or self.daughters > 0 or self.grandsons > 0 or self.granddaughters > 0:
-            total_descendants = self.sons + self.daughters + self.grandsons + self.granddaughters
-            if total_descendants > 0:
-                share_per_descendant = self.residue / total_descendants
-                if self.sons > 0:
-                    self.fixed_shares["each_son"] = share_per_descendant
-                
-                if self.daughters > 0:
-                    self.fixed_shares["each_daughter"] = share_per_descendant
-                
-                if self.grandsons > 0:
-                    self.fixed_shares["each_grandson"] = share_per_descendant
-
-                if self.granddaughters > 0:
-                    self.fixed_shares["each_granddaughter"] = share_per_descendant
+            
 
         
-        if (self.father > 0 or self.mother > 0 or self.paternal_grandfather > 0 or
-             self.paternal_grandmother > 0 or self.maternal_grandfather > 0 
-             or self.maternal_grandmother > 0 or self.brothers > 0 or self.sisters > 0):
-            total_ascendants = self.father + self.mother + self.paternal_grandfather + self.paternal_grandmother + self.maternal_grandfather + self.maternal_grandmother
-            if total_ascendants > 0:
-                share_per_ascendant = self.residue / total_ascendants
-                if self.father > 0:
-                    self.fixed_shares["father"] = share_per_ascendant
-                if self.mother > 0:
-                    self.fixed_shares["mother"] = share_per_ascendant
-                if self.paternal_grandfather > 0:
-                    self.fixed_shares["paternal_grandfather"] = share_per_ascendant
-                if self.paternal_grandmother > 0:
-                    self.fixed_shares["paternal_grandmother"] = share_per_ascendant
-                if self.maternal_grandfather > 0:
-                    self.fixed_shares["maternal_grandfather"] = share_per_ascendant
-                if self.maternal_grandmother > 0:
-                    self.fixed_shares["maternal_grandmother"] = share_per_ascendant
-                if self.brothers > 0:
-                    self.fixed_shares["each_brother"] = share_per_ascendant
-                if self.sisters > 0:
-                    self.fixed_shares["each_sister"] = share_per_ascendant
+        # if (self.father > 0 or self.mother > 0 or self.paternal_grandfather > 0 or
+        #      self.paternal_grandmother > 0 or self.maternal_grandfather > 0 
+        #      or self.maternal_grandmother > 0 or self.brothers > 0 or self.sisters > 0):
+        #     total_ascendants = self.father + self.mother + self.paternal_grandfather + self.paternal_grandmother + self.maternal_grandfather + self.maternal_grandmother
+        #     if total_ascendants > 0:
+        #         share_per_ascendant = self.residue / total_ascendants
+        #         if self.father > 0:
+        #             self.fixed_shares["father"] = share_per_ascendant
+        #         if self.mother > 0:
+        #             self.fixed_shares["mother"] = share_per_ascendant
+        #         if self.paternal_grandfather > 0:
+        #             self.fixed_shares["paternal_grandfather"] = share_per_ascendant
+        #         if self.paternal_grandmother > 0:
+        #             self.fixed_shares["paternal_grandmother"] = share_per_ascendant
+        #         if self.maternal_grandfather > 0:
+        #             self.fixed_shares["maternal_grandfather"] = share_per_ascendant
+        #         if self.maternal_grandmother > 0:
+        #             self.fixed_shares["maternal_grandmother"] = share_per_ascendant
+        #         if self.brothers > 0:
+        #             self.fixed_shares["each_brother"] = share_per_ascendant
+        #         if self.sisters > 0:
+        #             self.fixed_shares["each_sister"] = share_per_ascendant
 
         
 
@@ -401,7 +458,7 @@ class InheritanceSystem:
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print("Usage: python Hindu_RBS.py <user_id>")
+        print("Usage: python3 China_RBS.py <user_id>")
         sys.exit(1)
 
     user_id = sys.argv[1]
@@ -422,18 +479,18 @@ if __name__ == "__main__":
     facts_id = user_data["facts_id"]
 
     # Find InheritanceSystem ID (Hindu System)
-    connection = connect_db()
-    cursor = connection.cursor()
-    cursor.execute("SELECT idInheritanceSystem FROM InheritanceSystem WHERE system_name = %s", ("Hindu Inheritance",))
-    inheritance_system_data = cursor.fetchone()
-    cursor.close()
-    connection.close()
+    # connection = connect_db()
+    # cursor = connection.cursor()
+    # cursor.execute("SELECT idInheritanceSystem FROM InheritanceSystem WHERE system_name = %s", ("Hindu Inheritance",))
+    # inheritance_system_data = cursor.fetchone()
+    # cursor.close()
+    # connection.close()
 
-    if not inheritance_system_data:
-        print(f"❌ No matching inheritance system found.")
-        sys.exit(1)
+    # if not inheritance_system_data:
+    #     print(f"❌ No matching inheritance system found.")
+    #     sys.exit(1)
 
-    inheritance_system_id = inheritance_system_data[0]
+    # inheritance_system_id = inheritance_system_data[0]
 
     # Run Inheritance Calculation
     inheritance_system = InheritanceSystem(
