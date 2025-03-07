@@ -409,6 +409,25 @@ const HomePage: React.FC = () => {
             </div>
           </div>
         </div>
+
+        <div className="col-sm-6">
+          <div className="card">
+            <div className="card-body">
+              <h5 className="card-title">China Inheritance System</h5>
+              <p className="card-text">
+                This system calculates inheritance using China's legal framework this is applied 
+                in the country.
+              </p>
+              <button
+                onClick={() => handleGenerateResults("China Inheritance")
+                }
+                className="btn btn-primary"
+              >
+                Generate results
+              </button>
+            </div>
+          </div>
+        </div>
       
     </>
   );
