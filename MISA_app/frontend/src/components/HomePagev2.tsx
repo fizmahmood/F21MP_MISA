@@ -291,6 +291,7 @@ const HomePage: React.FC = () => {
         // ✅ Navigate to Results Page and pass the results
         navigate("/result", {
           state: {
+            system_name: selectedSystem,
             result: response.data.json_result,
             details: response.data.results_for_db,
           },

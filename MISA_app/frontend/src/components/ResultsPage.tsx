@@ -57,6 +57,8 @@ const ResultsPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   // const parsedResult = location.state?.result || {};
+  console.log("Location state:", location.state);
+  const systemName = location.state?.system_name ;
   const detailedResult = location.state?.details || {
     heirs: [],
     blocked_heirs: {},
@@ -125,7 +127,7 @@ const ResultsPage: React.FC = () => {
 
   return (
     <Container className="mt-4">
-      <h2 className="text-center">Inheritance Result</h2>
+      <h2 className="text-center">{systemName}</h2>
 
       {/* ✅ Eligible Heirs */}
       <Card className="shadow-lg mb-4">
@@ -169,7 +171,7 @@ const ResultsPage: React.FC = () => {
               {Object.entries(detailedResult.blocked_heirs).map(
                 ([heir, reason], idx) => (
                   <li key={idx} className="list-group-item">
-                    <strong>{heir.replace("_", " ")}:</strong> {reason}
+                    <strong>{heir.replace("_", " ")}:</strong> {reason as string}
                   </li>
                 )
               )}
