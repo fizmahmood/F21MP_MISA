@@ -385,9 +385,16 @@ if __name__ == "__main__":
     inheritance_results = inheritance_system.compute_inheritance()
     json_result = json.dumps(inheritance_results)
     results_for_db = inheritance_system.get_results_for_db()
+    context_info = """Inheritance in Russia follows a priority-based system. Closer relatives inherit first, and if any heir exists in a higher priority level, those in lower levels do not receive anything. The inheritance is equally divided among heirs within the same priority level.
+    Priority Levels:
+    First Priority: Children, spouse, and parents.
+    Second Priority: Siblings and grandparents (only inherit if no first-priority heirs exist).
+    Third Priority: Uncles, aunts, cousins, and other distant relatives (only inherit if no heirs from the first two levels exist).
+                    """
     
     output = {
         "json_result": json_result,
-        "results_for_db": results_for_db
+        "results_for_db": results_for_db,
+        "context_info": context_info
     }
     print(json.dumps(output))

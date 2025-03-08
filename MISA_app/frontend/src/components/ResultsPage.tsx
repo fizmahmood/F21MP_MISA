@@ -4,6 +4,7 @@ import { Bar, Pie } from "react-chartjs-2";
 // import Tree from "react-d3-tree";
 import { useEffect, useState } from "react";
 import { api } from "../api/api";
+import { Container, Card, Table, Button, Row, Col, Alert } from "react-bootstrap";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -123,104 +124,136 @@ const ResultsPage: React.FC = () => {
   };
 
   return (
-    <div className="container mt-4">
-      <h2>{"Inheritance Result"}</h2>
+    <Container className="mt-4">
+      <h2 className="text-center">Inheritance Result</h2>
 
-      {/* ✅ Display Eligible Heirs Table */}
-      <h4>Eligible Heirs</h4>
-      <table className="table table-bordered">
-        <thead>
-          <tr>
-            <th>Heir</th>
-            <th>Count</th>
-            <th>Amount</th>
-            <th>Percentage</th>
-            <th>Explanation</th>
-          </tr>
-        </thead>
-        <tbody>
-          {detailedResult.heirs.map((heir: Heir, idx: number) => (
-            <tr key={idx}>
-              <td>{heir.heir}</td>
-              <td>{heir.count}</td>
-              <td>${heir.amount.toFixed(2)}</td>
-              <td>{heir.percentage.toFixed(2)}%</td>
-              <td>{heir.explanation}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      {/* ✅ Display Blocked Heirs if any exist */}
-      {Object.keys(detailedResult.blocked_heirs).length > 0 && (
-        <div className="blocked-heirs">
-          <h4>Blocked Heirs</h4>
-          <ul>
-            {Object.entries(detailedResult.blocked_heirs).map(
-              ([heir, reason], idx) => (
-                <li key={idx}>
-                  <strong>{heir.replace("_", " ")}:</strong> {reason as string}
-                </li>
-              )
-            )}
-          </ul>
-        </div>
-      )}
-  
-      {detailedResult.will > 0 &&(
-      <div className="alert alert-info">
-        <h4>Will Amount</h4>
-        <p>
-          <strong>Amount:</strong> ${detailedResult.will.toFixed(2)} (
-          {(
-            (detailedResult.will / detailedResult.original_net_worth) *
-            100
-          ).toFixed(2)}
-          %)
-        </p>
-        <p>
-          Maximum allowed: {(detailedResult.original_net_worth / 3).toFixed(2)}
-        </p>
-      </div>)}
-
-      {/* ✅ Display User Facts */}
-      {facts && (
-        <div className="mt-4">
-          <h4>Heirs</h4>
-          <table className="table table-striped">
+      {/* ✅ Eligible Heirs */}
+      <Card className="shadow-lg mb-4">
+        <Card.Header as="h4" className="text-center bg-primary text-white">
+          Eligible Heirs
+        </Card.Header>
+        <Card.Body>
+          <Table striped bordered hover responsive className="table-dark">
             <thead>
               <tr>
-                <th>Category</th>
+                <th>Heir</th>
                 <th>Count</th>
+                <th>Amount</th>
+                <th>Percentage</th>
+                <th>Explanation</th>
               </tr>
             </thead>
             <tbody>
-              {Object.entries(facts).map(([key, value], index) => (
-                <tr key={index}>
-                  <td>{key.replace(/_/g, " ")}</td>
-                  <td>{value}</td>
+              {detailedResult.heirs.map((heir: Heir, idx: number) => (
+                <tr key={idx}>
+                  <td>{heir.heir}</td>
+                  <td>{heir.count}</td>
+                  <td>${heir.amount.toFixed(2)}</td>
+                  <td>{heir.percentage.toFixed(2)}%</td>
+                  <td>{heir.explanation}</td>
                 </tr>
               ))}
             </tbody>
-          </table>
-        </div>
+          </Table>
+        </Card.Body>
+      </Card>
+
+      {/* ✅ Blocked Heirs */}
+      {Object.keys(detailedResult.blocked_heirs).length > 0 && (
+        <Card className="shadow-lg mb-4">
+          <Card.Header as="h4" className="text-center bg-danger text-white">
+            Blocked Heirs
+          </Card.Header>
+          <Card.Body>
+            <ul className="list-group">
+              {Object.entries(detailedResult.blocked_heirs).map(
+                ([heir, reason], idx) => (
+                  <li key={idx} className="list-group-item">
+                    <strong>{heir.replace("_", " ")}:</strong> {reason}
+                  </li>
+                )
+              )}
+            </ul>
+          </Card.Body>
+        </Card>
       )}
 
-      {/* ✅ Display Charts */}
-      <div style={{ width: "500px", margin: "auto" }}>
-        <h4>Bar Chart</h4>
-        <Bar data={chartData} options={{ responsive: true }} />
-      </div>
+      {/* ✅ Will Amount */}
+      {detailedResult.will > 0 && (
+        <Alert variant="info" className="text-center">
+          <h4>Will Amount</h4>
+          <p>
+            <strong>Amount:</strong> ${detailedResult.will.toFixed(2)} (
+            {((detailedResult.will / detailedResult.original_net_worth) * 100).toFixed(2)}%)
+          </p>
+          <p>
+            Maximum allowed: ${(detailedResult.original_net_worth / 3).toFixed(2)}
+          </p>
+        </Alert>
+      )}
 
-      <div style={{ width: "500px", margin: "auto" }}>
-        <h4>Pie Chart</h4>
-        <Pie data={pieChartData} options={{ responsive: true }} />
-      </div>
+      {/* ✅ Facts Table */}
+      {facts && (
+        <Card className="shadow-lg mb-4">
+          <Card.Header as="h4" className="text-center bg-secondary text-white">
+            User Facts
+          </Card.Header>
+          <Card.Body>
+            <Table striped bordered hover responsive>
+              <thead>
+                <tr>
+                  <th>Category</th>
+                  <th>Count</th>
+                </tr>
+              </thead>
+              <tbody>
+                {Object.entries(facts).map(([key, value], index) => (
+                  <tr key={index}>
+                    <td>{key.replace(/_/g, " ")}</td>
+                    <td>{value}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </Card.Body>
+        </Card>
+      )}
 
-      <button onClick={() => navigate("/")} className="btn btn-secondary mt-3">
-        Back to Home
-      </button>
-    </div>
+      {/* ✅ Charts Section */}
+      <Row className="mt-4">
+        <Col md={6}>
+          <Card className="shadow-lg">
+            <Card.Header as="h4" className="text-center bg-info text-white">
+              Bar Chart
+            </Card.Header>
+            <Card.Body>
+              <div style={{ height: "300px" }}>
+                <Bar data={chartData} options={{ responsive: true }} />
+              </div>
+            </Card.Body>
+          </Card>
+        </Col>
+        <Col md={6}>
+          <Card className="shadow-lg">
+            <Card.Header as="h4" className="text-center bg-warning text-white">
+              Pie Chart
+            </Card.Header>
+            <Card.Body>
+              <div style={{ height: "300px" }}>
+                <Pie data={chartData} options={{ responsive: true }} />
+              </div>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+
+      {/* ✅ Back to Home Button */}
+      <div className="text-center mt-4">
+        <Button onClick={() => navigate("/")} variant="secondary">
+          Back to Home
+        </Button>
+      </div>
+    </Container>
   );
 };
 

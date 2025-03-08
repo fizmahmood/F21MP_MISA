@@ -10,6 +10,7 @@ import HomePage from "./components/HomePagev2";
 import ResultsPage from "./components/ResultsPage";
 import EditableForm from "./components/EditableForm";
 import InheritanceResults from "./components/InheritanceResults";
+import Navigation from "./components/NavBar";
 // import FactsLoader from "./components/FactsLoader";
 
 const App: React.FC = () => {
@@ -18,6 +19,9 @@ const App: React.FC = () => {
 
   return (
     <Router>
+      {/* Navigation Bar Component */}
+      <Navigation /> 
+      
       <Routes>
         <Route path="/welcome" element={<WelcomePage />} />
         <Route path="/home" element={<HomePage />} />
