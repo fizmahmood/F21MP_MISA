@@ -4,6 +4,7 @@ import { api } from "../api/api";
 import { useNavigate } from "react-router-dom";
 import useFacts from "../hooks/useFacts";
 import FactsLoader from "./FactsLoader";
+import { Container, Row, Col, Card, Button } from "react-bootstrap";
 
 // import { userInfo } from "os";
 
@@ -312,144 +313,199 @@ const HomePage: React.FC = () => {
   return (
     <>
       <FactsLoader />
-      <nav className="navbar navbar-expand-lg bg-body-tertiary">
-        <div className="container-fluid">
-          <a className="navbar-brand" href="#">
-            Navbar
-          </a>
-          <button
-            className="navbar-toggler"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#navbarNav"
-            aria-controls="navbarNav"
-            aria-expanded="false"
-            aria-label="Toggle navigation"
-          >
-            <span className="navbar-toggler-icon"></span>
-          </button>
-          <div className="collapse navbar-collapse" id="navbarNav">
-            <ul className="navbar-nav">
-              <li className="nav-item">
-                <a className="nav-link active" aria-current="page" href="#">
-                  Home
-                </a>
-              </li>
-              <li className="nav-item">
-                <a className="nav-link" href="#">
-                  Features
-                </a>
-              </li>
-              <li className="nav-item">
-                <a className="nav-link" href="#">
-                  Pricing
-                </a>
-              </li>
-              <li className="nav-item">
-                <a className="nav-link disabled" aria-disabled="true">
-                  Disabled
-                </a>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </nav>
-      <div className="row">
-        <div className="col-sm-6 mb-3 mb-sm-0">
-          <div className="card">
-            <div className="card-body">
-              <h5 className="card-title">Islamic Inheritance System</h5>
-              <p className="card-text">
-                This system calculates inheritance using Islamic rules followed
-                by the Muslim population.
-              </p>
-              <button
-                onClick={() => handleGenerateResults("Islamic Inheritance")}
-                className="btn btn-primary"
-              >
-                Generate results
-              </button>
-            </div>
-          </div>
-        </div>
+      <Container className="mt-4">
+        {/* 🕌 Religious Inheritance Systems */}
+        <h2 className="mb-3 text-center">🕌 Religious Inheritance Systems</h2>
+        <Row className="mb-4">
+          <Col md={6}>
+            <Card className="shadow-sm border-0">
+              <Card.Body>
+                <Card.Title>Islamic Inheritance</Card.Title>
+                <Card.Text>
+                  This system calculates inheritance based on Islamic laws.
+                </Card.Text>
+                <Button
+                  onClick={() => handleGenerateResults("Islamic Inheritance")}
+                  variant="primary"
+                >
+                  Generate Results
+                </Button>
+              </Card.Body>
+            </Card>
+          </Col>
 
-        <div className="col-sm-6">
-          <div className="card">
-            <div className="card-body">
-              <h5 className="card-title">Hindu Inheritance System</h5>
-              <p className="card-text">
-                This system calculates inheritance using Hindu rules, widely
-                followed in India.
-              </p>
-              <button
-                onClick={() => handleGenerateResults("Hindu Inheritance")
-                }
-                className="btn btn-primary"
-              >
-                Generate results
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="col-sm-6">
-          <div className="card">
-            <div className="card-body">
-              <h5 className="card-title">India Inheritance System</h5>
-              <p className="card-text">
-                This system calculates inheritance using India legal framework this is applied 
-                for religions other than Hindu and Muslim and also for those who do not follow any religion.
-              </p>
-              <button
-                onClick={() => handleGenerateResults("India Inheritance")
-                }
-                className="btn btn-primary"
-              >
-                Generate results
-              </button>
-            </div>
-          </div>
-        </div>
+          <Col md={6}>
+            <Card className="shadow-sm border-0">
+              <Card.Body>
+                <Card.Title>Hindu Inheritance</Card.Title>
+                <Card.Text>
+                  This system calculates inheritance based on Hindu legal traditions.
+                </Card.Text>
+                <Button
+                  onClick={() => handleGenerateResults("Hindu Inheritance")}
+                  variant="primary"
+                >
+                  Generate Results
+                </Button>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
 
-        <div className="col-sm-6">
-          <div className="card">
-            <div className="card-body">
-              <h5 className="card-title">China Inheritance System</h5>
-              <p className="card-text">
-                This system calculates inheritance using China's legal framework this is applied 
-                in the country.
-              </p>
-              <button
-                onClick={() => handleGenerateResults("China Inheritance")
-                }
-                className="btn btn-primary"
-              >
-                Generate results
-              </button>
-            </div>
-          </div>
-        </div>
+        {/* 🏛 National Inheritance Systems */}
+        <h2 className="mb-3 text-center">🏛 National Inheritance Systems</h2>
+        <Row>
+          <Col md={4}>
+            <Card className="shadow-sm border-0">
+              <Card.Body>
+                <Card.Title>India Inheritance</Card.Title>
+                <Card.Text>
+                  This system follows the Indian Succession Act for inheritance distribution.
+                </Card.Text>
+                <Button
+                  onClick={() => handleGenerateResults("India Inheritance")}
+                  variant="primary"
+                >
+                  Generate Results
+                </Button>
+              </Card.Body>
+            </Card>
+          </Col>
 
-        <div className="col-sm-6">
-          <div className="card">
-            <div className="card-body">
-              <h5 className="card-title">Russia Inheritance System</h5>
-              <p className="card-text">
-                This system calculates inheritance using Russia's legal framework this is applied 
-                in the country.
-              </p>
-              <button
-                onClick={() => handleGenerateResults("Russia Inheritance")
-                }
-                className="btn btn-primary"
-              >
-                Generate results
-              </button>
-            </div>
-          </div>
-        </div>
-      
+          <Col md={4}>
+            <Card className="shadow-sm border-0">
+              <Card.Body>
+                <Card.Title>China Inheritance</Card.Title>
+                <Card.Text>
+                  This system follows inheritance rules as per China’s legal framework.
+                </Card.Text>
+                <Button
+                  onClick={() => handleGenerateResults("China Inheritance")}
+                  variant="primary"
+                >
+                  Generate Results
+                </Button>
+              </Card.Body>
+            </Card>
+          </Col>
+
+          <Col md={4}>
+            <Card className="shadow-sm border-0">
+              <Card.Body>
+                <Card.Title>Russia Inheritance</Card.Title>
+                <Card.Text>
+                  This system follows Russian inheritance laws for property distribution.
+                </Card.Text>
+                <Button
+                  onClick={() => handleGenerateResults("Russia Inheritance")}
+                  variant="primary"
+                >
+                  Generate Results
+                </Button>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+      </Container>
     </>
+    // <>
+    //   <FactsLoader />
+    //   <div className="row">
+    //     <div className="col-sm-6 mb-3 mb-sm-0">
+    //       <div className="card">
+    //         <div className="card-body">
+    //           <h5 className="card-title">Islamic Inheritance System</h5>
+    //           <p className="card-text">
+    //             This system calculates inheritance using Islamic rules followed
+    //             by the Muslim population.
+    //           </p>
+    //           <button
+    //             onClick={() => handleGenerateResults("Islamic Inheritance")}
+    //             className="btn btn-primary"
+    //           >
+    //             Generate results
+    //           </button>
+    //         </div>
+    //       </div>
+    //     </div>
+
+    //     <div className="col-sm-6">
+    //       <div className="card">
+    //         <div className="card-body">
+    //           <h5 className="card-title">Hindu Inheritance System</h5>
+    //           <p className="card-text">
+    //             This system calculates inheritance using Hindu rules, widely
+    //             followed in India.
+    //           </p>
+    //           <button
+    //             onClick={() => handleGenerateResults("Hindu Inheritance")
+    //             }
+    //             className="btn btn-primary"
+    //           >
+    //             Generate results
+    //           </button>
+    //         </div>
+    //       </div>
+    //     </div>
+    //   </div>
+    //   <div className="col-sm-6">
+    //       <div className="card">
+    //         <div className="card-body">
+    //           <h5 className="card-title">India Inheritance System</h5>
+    //           <p className="card-text">
+    //             This system calculates inheritance using India legal framework this is applied 
+    //             for religions other than Hindu and Muslim and also for those who do not follow any religion.
+    //           </p>
+    //           <button
+    //             onClick={() => handleGenerateResults("India Inheritance")
+    //             }
+    //             className="btn btn-primary"
+    //           >
+    //             Generate results
+    //           </button>
+    //         </div>
+    //       </div>
+    //     </div>
+
+    //     <div className="col-sm-6">
+    //       <div className="card">
+    //         <div className="card-body">
+    //           <h5 className="card-title">China Inheritance System</h5>
+    //           <p className="card-text">
+    //             This system calculates inheritance using China's legal framework this is applied 
+    //             in the country.
+    //           </p>
+    //           <button
+    //             onClick={() => handleGenerateResults("China Inheritance")
+    //             }
+    //             className="btn btn-primary"
+    //           >
+    //             Generate results
+    //           </button>
+    //         </div>
+    //       </div>
+    //     </div>
+
+    //     <div className="col-sm-6">
+    //       <div className="card">
+    //         <div className="card-body">
+    //           <h5 className="card-title">Russia Inheritance System</h5>
+    //           <p className="card-text">
+    //             This system calculates inheritance using Russia's legal framework this is applied 
+    //             in the country.
+    //           </p>
+    //           <button
+    //             onClick={() => handleGenerateResults("Russia Inheritance")
+    //             }
+    //             className="btn btn-primary"
+    //           >
+    //             Generate results
+    //           </button>
+    //         </div>
+    //       </div>
+    //     </div>
+      
+    // </>
   );
 };
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Form, Container, Row, Col, Button } from "react-bootstrap";
+import { Form, Container, Row, Col, Button, Card } from "react-bootstrap";
 import axios from "axios";
 import useUserInfo from "../hooks/useUserInfo";
 import { useNavigate } from "react-router-dom";
@@ -159,6 +159,34 @@ export default function InheritanceForm() {
     });
   };
 
+  useEffect(() => {
+    if (formData.married === "Yes" && formData.gender === "Male") {
+      setFormData((prev) => ({
+        ...prev,
+        wife: 1, // ✅ Automatically set wife = 1 if male and married
+      }));
+    } 
+    else if(formData.married === "Yes" && formData.gender === "Female") {
+      setFormData((prev) => ({
+        ...prev,
+        husband: 1, // 
+      }));
+    } 
+    else if (formData.gender === "Male") {
+      setFormData((prev) => ({
+        ...prev,
+        wife: 0, // Reset wife field if conditions are not met
+      }));
+    }
+    else if (formData.gender === "Female") {
+      setFormData((prev) => ({
+        ...prev,
+        husband: 0, 
+      }));
+    }
+
+  }, [formData.married, formData.gender]); // ✅ Runs when married or gender changes
+
   // ✅ Handle form submission
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -186,99 +214,57 @@ export default function InheritanceForm() {
   };
 
   return (
-    <Container
-      fluid
-      className="vh-100 d-flex align-items-center justify-content-center"
-    >
-      <Row className="w-100">
-        <Col md={{ span: 8, offset: 2 }} lg={{ span: 6, offset: 3 }}>
-          <div className="p-4 border rounded bg-light">
-            <h2 className="text-center">Inheritance Information Form</h2>
+    <Container className="mt-4">
+      <Row className="justify-content-center">
+        <Col md={8}>
+          <Card className="p-4 shadow-lg">
+            <h2 className="text-center mb-4">Inheritance Information Form</h2>
             <Form onSubmit={handleSubmit}>
-              {/* Gender */}
-              <Form.Group>
-                <Form.Label>Gender:</Form.Label>
-                <Form.Check
-                  type="radio"
-                  label="Male"
-                  name="gender"
-                  value="Male"
-                  onChange={handleChange}
-                  required
-                />
-                <Form.Check
-                  type="radio"
-                  label="Female"
-                  name="gender"
-                  value="Female"
-                  onChange={handleChange}
-                  required
-                />
-              </Form.Group>
+              {/* 🔹 Gender & Married Card */}
+              <Card className="mb-3">
+                <Card.Body>
+                  <h5>Personal Information</h5>
+                  <Row>
+                    <Col md={6}>
+                      <Form.Label>Gender:</Form.Label>
+                      <div className="d-flex">
+                        <Form.Check inline type="radio" label="Male" name="gender" value="Male" onChange={handleChange} required />
+                        <Form.Check inline type="radio" label="Female" name="gender" value="Female" onChange={handleChange} required />
+                      </div>
+                    </Col>
+                    <Col md={6}>
+                      <Form.Label>Are you Married?</Form.Label>
+                      <div className="d-flex">
+                        <Form.Check inline type="radio" label="Yes" name="married" value="Yes" onChange={handleChange} required />
+                        <Form.Check inline type="radio" label="No" name="married" value="No" onChange={handleChange} required />
+                      </div>
+                    </Col>
+                  </Row>
+                </Card.Body>
+              </Card>
 
-              {/* Married */}
-              <Form.Group>
-                <Form.Label>Are you Married?</Form.Label>
-                <Form.Check
-                  type="radio"
-                  label="Yes"
-                  name="married"
-                  value="Yes"
-                  onChange={handleChange}
-                  required
-                />
-                <Form.Check
-                  type="radio"
-                  label="No"
-                  name="married"
-                  value="No"
-                  onChange={handleChange}
-                  required
-                />
-              </Form.Group>
-              
-              {/* Parents */}
-              <Form.Group>
-                <Form.Label>Is Father Alive?</Form.Label>
-                <Form.Check
-                  type="radio"
-                  label="Yes"
-                  name="father"
-                  value="1"
-                  onChange={handleChange}
-                  required
-                />
-                <Form.Check
-                  type="radio"
-                  label="No"
-                  name="father"
-                  value="0"
-                  onChange={handleChange}
-                  required
-                />
-              </Form.Group>
-
-              <Form.Group>
-                <Form.Label>Is Mother Alive?</Form.Label>
-                <Form.Check
-                  type="radio"
-                  label="Yes"
-                  name="mother"
-                  value="1"
-                  onChange={handleChange}
-                  required
-                />
-                <Form.Check
-                  type="radio"
-                  label="No"
-                  name="mother"
-                  value="0"
-                  onChange={handleChange}
-                  required
-                />
-              </Form.Group>
-
-              {/* Grandparents Selection */}
+              {/* 🔹 Parents & Grandparents Card */}
+              <Card className="mb-3">
+                <Card.Body>
+                  <h5>Family Information</h5>
+                  <Row>
+                    <Col md={6}>
+                      <Form.Label>Is Father Alive?</Form.Label>
+                      <div className="d-flex">
+                        <Form.Check inline type="radio" label="Yes" name="father" value="1" onChange={handleChange} required />
+                        <Form.Check inline type="radio" label="No" name="father" value="0" onChange={handleChange} required />
+                      </div>
+                    </Col>
+                    <Col md={6}>
+                      <Form.Label>Is Mother Alive?</Form.Label>
+                      <div className="d-flex">
+                        <Form.Check inline type="radio" label="Yes" name="mother" value="1" onChange={handleChange} required />
+                        <Form.Check inline type="radio" label="No" name="mother" value="0" onChange={handleChange} required />
+                      </div>
+                    </Col>
+                  </Row>
+                  <Row>
+                              {/* Grandparents Selection */}
               <Form.Group>
                 <Form.Label>Do you have grandparents?</Form.Label>
                 <Form.Check
@@ -345,70 +331,35 @@ export default function InheritanceForm() {
                   </Row>
                 </Form.Group>
               )}
+                  </Row>
+                </Card.Body>
+              </Card>
 
-              {/* Number Inputs */}
-              {formData.married === "Yes" && (
-                <>
+              {/* 🔹 Siblings Inputs Side-by-Side */}
+              <Row>
+                <Col md={6}>
                   <Form.Group>
-                    <Form.Label>Number of Sons:</Form.Label>
-                    <Form.Control
-                      type="number"
-                      name="sons"
-                      min="0"
-                      value={formData.sons}
-                      onChange={handleChange}
-                      required
-                    />
+                    <Form.Label>Number of Brothers:</Form.Label>
+                    <Form.Control type="number" name="brothers" min="0" max="99" value={formData.brothers} onChange={handleChange} required />
                   </Form.Group>
-
+                </Col>
+                <Col md={6}>
                   <Form.Group>
-                    <Form.Label>Number of Daughters:</Form.Label>
-                    <Form.Control
-                      type="number"
-                      name="daughters"
-                      min="0"
-                      value={formData.daughters}
-                      onChange={handleChange}
-                      required
-                    />
+                    <Form.Label>Number of Sisters:</Form.Label>
+                    <Form.Control type="number" name="sisters" min="0" max="99" value={formData.sisters} onChange={handleChange} required />
                   </Form.Group>
-                </>
-              )}
+                </Col>
+              </Row>
 
-              <Form.Group>
-                <Form.Label>Number of Brothers:</Form.Label>
-                <Form.Control
-                  type="number"
-                  name="brothers"
-                  min="0"
-                  value={formData.brothers}
-                  onChange={handleChange}
-                  required
-                />
+              {/* 🔹 Net Worth & Will Amount */}
+              <Form.Group className="mt-3">
+                <Form.Label>Net Worth ($):</Form.Label>
+                <Form.Control type="number" name="networth" min="0" value={formData.networth} onChange={handleChange} required />
               </Form.Group>
 
-              <Form.Group>
-                <Form.Label>Number of Sisters:</Form.Label>
-                <Form.Control
-                  type="number"
-                  name="sisters"
-                  min="0"
-                  value={formData.sisters}
-                  onChange={handleChange}
-                  required
-                />
-              </Form.Group>
-
-              <Form.Group>
-                <Form.Label>Net Worth</Form.Label>
-                <Form.Control
-                  type="number"
-                  name="networth"
-                  min="0"
-                  value={formData.networth}
-                  onChange={handleChange}
-                  required
-                />
+              <Form.Group className="mt-3">
+                <Form.Label>Will Amount ($):</Form.Label>
+                <Form.Control type="number" name="will_amount" min="0" value={formData.will_amount} onChange={handleChange} required />
               </Form.Group>
 
               {/* Submit Button */}
@@ -416,10 +367,246 @@ export default function InheritanceForm() {
                 Save
               </Button>
             </Form>
-          </div>
+          </Card>
         </Col>
       </Row>
     </Container>
+
+
+    // <Container
+    //   fluid
+    //   className="vh-100 d-flex align-items-center justify-content-center"
+    // >
+    //   <Row className="w-100">
+    //     <Col md={{ span: 8, offset: 2 }} lg={{ span: 6, offset: 3 }}>
+    //       <div className="p-4 border rounded bg-light">
+    //         <h2 className="text-center">Inheritance Information Form</h2>
+    //         <Form onSubmit={handleSubmit}>
+    //           {/* Gender */}
+    //           <Form.Group>
+    //             <Form.Label>Gender:</Form.Label>
+    //             <Form.Check
+    //               type="radio"
+    //               label="Male"
+    //               name="gender"
+    //               value="Male"
+    //               onChange={handleChange}
+    //               required
+    //             />
+    //             <Form.Check
+    //               type="radio"
+    //               label="Female"
+    //               name="gender"
+    //               value="Female"
+    //               onChange={handleChange}
+    //               required
+    //             />
+    //           </Form.Group>
+
+    //           {/* Married */}
+    //           <Form.Group>
+    //             <Form.Label>Are you Married?</Form.Label>
+    //             <Form.Check
+    //               type="radio"
+    //               label="Yes"
+    //               name="married"
+    //               value="Yes"
+    //               onChange={handleChange}
+    //               required
+    //             />
+    //             <Form.Check
+    //               type="radio"
+    //               label="No"
+    //               name="married"
+    //               value="No"
+    //               onChange={handleChange}
+    //               required
+    //             />
+    //           </Form.Group>
+              
+    //           {/* Parents */}
+    //           <Form.Group>
+    //             <Form.Label>Is Father Alive?</Form.Label>
+    //             <Form.Check
+    //               type="radio"
+    //               label="Yes"
+    //               name="father"
+    //               value="1"
+    //               onChange={handleChange}
+    //               required
+    //             />
+    //             <Form.Check
+    //               type="radio"
+    //               label="No"
+    //               name="father"
+    //               value="0"
+    //               onChange={handleChange}
+    //               required
+    //             />
+    //           </Form.Group>
+
+    //           <Form.Group>
+    //             <Form.Label>Is Mother Alive?</Form.Label>
+    //             <Form.Check
+    //               type="radio"
+    //               label="Yes"
+    //               name="mother"
+    //               value="1"
+    //               onChange={handleChange}
+    //               required
+    //             />
+    //             <Form.Check
+    //               type="radio"
+    //               label="No"
+    //               name="mother"
+    //               value="0"
+    //               onChange={handleChange}
+    //               required
+    //             />
+    //           </Form.Group>
+
+              // {/* Grandparents Selection */}
+              // <Form.Group>
+              //   <Form.Label>Do you have grandparents?</Form.Label>
+              //   <Form.Check
+              //     type="radio"
+              //     label="Yes"
+              //     name="grandparents"
+              //     value="Yes"
+              //     onChange={handleChange}
+              //     required
+              //   />
+              //   <Form.Check
+              //     type="radio"
+              //     label="No"
+              //     name="grandparents"
+              //     value="No"
+              //     onChange={handleChange}
+              //     required
+              //   />
+              // </Form.Group>
+
+              // {formData.grandparents === "Yes" && (
+              //   <Form.Group>
+              //     <Form.Label className="d-block text-center fw-bold">
+              //       Select the ones that are alive
+              //     </Form.Label>
+              //     <Row>
+              //       {/* Paternal Side */}
+              //       <Col md={6} className="border p-3">
+              //         <h5 className="text-center">Father's Side</h5>
+              //         <Form.Check
+              //           type="checkbox"
+              //           label="Paternal Grandfather"
+              //           name="paternal_grandfather"
+              //           checked={formData.paternal_grandfather === 1}
+              //           onChange={handleChange}
+              //         />
+              //         <Form.Check
+              //           type="checkbox"
+              //           label="Paternal Grandmother"
+              //           name="paternal_grandmother"
+              //           checked={formData.paternal_grandmother === 1}
+              //           onChange={handleChange}
+              //         />
+              //       </Col>
+
+              //       {/* Maternal Side */}
+              //       <Col md={6} className="border p-3">
+              //         <h5 className="text-center">Mother's Side</h5>
+              //         <Form.Check
+              //           type="checkbox"
+              //           label="Maternal Grandfather"
+              //           name="maternal_grandfather"
+              //           checked={formData.maternal_grandfather === 1}
+              //           onChange={handleChange}
+              //         />
+              //         <Form.Check
+              //           type="checkbox"
+              //           label="Maternal Grandmother"
+              //           name="maternal_grandmother"
+              //           checked={formData.maternal_grandmother === 1}
+              //           onChange={handleChange}
+              //         />
+              //       </Col>
+              //     </Row>
+              //   </Form.Group>
+              // )}
+
+    //           {/* Number Inputs */}
+    //           {formData.married === "Yes" && (
+    //             <>
+    //               <Form.Group>
+    //                 <Form.Label>Number of Sons:</Form.Label>
+    //                 <Form.Control
+    //                   type="number"
+    //                   name="sons"
+    //                   min="0"
+    //                   value={formData.sons}
+    //                   onChange={handleChange}
+    //                   required
+    //                 />
+    //               </Form.Group>
+
+    //               <Form.Group>
+    //                 <Form.Label>Number of Daughters:</Form.Label>
+    //                 <Form.Control
+    //                   type="number"
+    //                   name="daughters"
+    //                   min="0"
+    //                   value={formData.daughters}
+    //                   onChange={handleChange}
+    //                   required
+    //                 />
+    //               </Form.Group>
+    //             </>
+    //           )}
+
+    //           <Form.Group>
+    //             <Form.Label>Number of Brothers:</Form.Label>
+    //             <Form.Control
+    //               type="number"
+    //               name="brothers"
+    //               min="0"
+    //               value={formData.brothers}
+    //               onChange={handleChange}
+    //               required
+    //             />
+    //           </Form.Group>
+
+    //           <Form.Group>
+    //             <Form.Label>Number of Sisters:</Form.Label>
+    //             <Form.Control
+    //               type="number"
+    //               name="sisters"
+    //               min="0"
+    //               value={formData.sisters}
+    //               onChange={handleChange}
+    //               required
+    //             />
+    //           </Form.Group>
+
+    //           <Form.Group>
+    //             <Form.Label>Net Worth</Form.Label>
+    //             <Form.Control
+    //               type="number"
+    //               name="networth"
+    //               min="0"
+    //               value={formData.networth}
+    //               onChange={handleChange}
+    //               required
+    //             />
+    //           </Form.Group>
+
+    //           {/* Submit Button */}
+    //           <Button type="submit" className="btn btn-primary w-100 mt-3">
+    //             Save
+    //           </Button>
+    //         </Form>
+    //       </div>
+    //     </Col>
+    //   </Row>
+    // </Container>
   );
 }
 
