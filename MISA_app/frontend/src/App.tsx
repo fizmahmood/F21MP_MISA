@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 import {
   HashRouter as Router,
   Routes,
@@ -12,12 +12,27 @@ import EditableForm from "./components/EditableForm";
 import InheritanceResults from "./components/InheritanceResults";
 import Navigation from "./components/NavBar";
 // import FactsLoader from "./components/FactsLoader";
+import "./App.css";
 
 const App: React.FC = () => {
   const userUUID = localStorage.getItem("userUUID");
   console.log("User UUID:", userUUID);
 
+  const [darkMode, setDarkMode] = useState(true); // ✅ Default to dark mode
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme) {
+      setDarkMode(savedTheme === "dark");
+    } else {
+      setDarkMode(true); // ✅ Set dark mode as default
+    }
+  }, []);
+
+
+
   return (
+    <div className={darkMode ? "dark-mode" : "light-mode"}>
     <Router>
       {/* Navigation Bar Component */}
       <Navigation /> 
@@ -39,6 +54,7 @@ const App: React.FC = () => {
         <Route path="*" element={<Navigate to={userUUID ? "/home" : "/welcome"} />} />
       </Routes>
     </Router>
+    </div>
   );
 };
 

@@ -261,7 +261,7 @@ const ResultsPage: React.FC = () => {
 
 export default ResultsPage;
 
-// // import React, {useState} from "react";
+
 // import { useLocation, useNavigate } from "react-router-dom";
 // import { Bar, Pie } from "react-chartjs-2";
 // // import Tree from "react-d3-tree";

@@ -1,0 +1,48 @@
+/* Apply default dark theme with background image */
+body {
+    background: url('/images/dark_gradient_bg.jpg') no-repeat center center fixed;
+    background-size: cover;
+    color: white; /* Adjust text color for readability */
+    transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+  }
+  
+  /* Ensure card and navbar elements adapt */
+  /* .card {
+    background: rgba(0, 0, 0, 0.8); /* Dark semi-transparent background *
+    color: white;
+  } */
+
+  .card {
+    background-color: #1e1e1e6d !important; /* Force dark background */
+    color: #ffffff !important; /* Force white text */
+    box-shadow: 0px 4px 10px rgba(255, 255, 255, 0.476) !important; /* Force white shadow */
+    border: 0.2px solid white !important;
+    transition: background-color 0.3s, box-shadow 0.3s;
+}
+  
+  .navbar {
+    background: rgba(0, 0, 0, 0.9); /* Navbar also gets a dark transparent shade */
+  }
+  
+  .dark-mode {
+    background: url('/images/dark_gradient_bg.jpg') no-repeat center center fixed;
+    background-size: cover;
+    color: white;
+  }
+  
+  .light-mode {
+    background: url('/images/light_gradient_bg.jpg') no-repeat center center fixed;
+    background-size: cover;
+    color: black;
+    visibility: visible;
+  }
+  
+  /* Add transition for smooth theme switching */
+  body.light-mode {
+    transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+  }
+
+  /* Ensure cards, buttons, and containers are visible */
+.card, .navbar, .container, .btn {
+    transition: all 0.3s ease-in-out;
+  }

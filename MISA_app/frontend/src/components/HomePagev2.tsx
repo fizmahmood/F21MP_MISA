@@ -36,7 +36,7 @@ const HomePage: React.FC = () => {
   //   const parsedUserInfo = JSON.parse(storedUserInfo);
   //   if (storedUserInfo) {
   //     try {
-        
+
   //       // const parsedFactId = JSON.parse(storedFactId);
   //       if (parsedUserInfo.user_id ) {
   //         setUser({
@@ -280,7 +280,7 @@ const HomePage: React.FC = () => {
       //     const response = await api.post("/share_inheritance", {
       //       user_id: user.user_id,
       //       system_name: systemData.system_name,  // ✅ Ensure only system_name is sent
-      //       Facts_id: facts_id, 
+      //       Facts_id: facts_id,
       // });
 
       if (response.data.success) {
@@ -313,12 +313,27 @@ const HomePage: React.FC = () => {
   return (
     <>
       <FactsLoader />
+      <Container className="mt-5">
+        <Card className="shadow-lg p-4 border-0 text-center">
+          <Card.Body>
+            <h2 className="mb-3 text-primary fw-bold">
+              💼 Choose Your Inheritance System
+            </h2>
+            <p className="lead text-muted">
+              Select an inheritance system that aligns with your legal or
+              religious preference. Our system supports Religious Inheritance
+              Laws and National Succession Laws to provide accurate wealth
+              distribution based on your selection.
+            </p>
+          </Card.Body>
+        </Card>
+      </Container>
       <Container className="mt-4">
         {/* 🕌 Religious Inheritance Systems */}
         <h2 className="mb-3 text-center">🕌 Religious Inheritance Systems</h2>
         <Row className="mb-4">
           <Col md={6}>
-            <Card className="shadow-sm border-0">
+            <Card className="shadow-lg border-0">
               <Card.Body>
                 <Card.Title>Islamic Inheritance</Card.Title>
                 <Card.Text>
@@ -335,11 +350,12 @@ const HomePage: React.FC = () => {
           </Col>
 
           <Col md={6}>
-            <Card className="shadow-sm border-0">
+            <Card className="shadow-lg border-0">
               <Card.Body>
                 <Card.Title>Hindu Inheritance</Card.Title>
                 <Card.Text>
-                  This system calculates inheritance based on Hindu legal traditions.
+                  This system calculates inheritance based on Hindu legal
+                  traditions.
                 </Card.Text>
                 <Button
                   onClick={() => handleGenerateResults("Hindu Inheritance")}
@@ -356,11 +372,12 @@ const HomePage: React.FC = () => {
         <h2 className="mb-3 text-center">🏛 National Inheritance Systems</h2>
         <Row>
           <Col md={4}>
-            <Card className="shadow-sm border-0">
+            <Card className="shadow-lg border-0">
               <Card.Body>
                 <Card.Title>India Inheritance</Card.Title>
                 <Card.Text>
-                  This system follows the Indian Succession Act for inheritance distribution.
+                  This system follows the Indian Succession Act for inheritance
+                  distribution.
                 </Card.Text>
                 <Button
                   onClick={() => handleGenerateResults("India Inheritance")}
@@ -373,11 +390,12 @@ const HomePage: React.FC = () => {
           </Col>
 
           <Col md={4}>
-            <Card className="shadow-sm border-0">
+            <Card className="shadow-lg border-0">
               <Card.Body>
                 <Card.Title>China Inheritance</Card.Title>
                 <Card.Text>
-                  This system follows inheritance rules as per China’s legal framework.
+                  This system follows inheritance rules as per China’s legal
+                  framework.
                 </Card.Text>
                 <Button
                   onClick={() => handleGenerateResults("China Inheritance")}
@@ -390,11 +408,12 @@ const HomePage: React.FC = () => {
           </Col>
 
           <Col md={4}>
-            <Card className="shadow-sm border-0">
+            <Card className="shadow-lg border-0">
               <Card.Body>
                 <Card.Title>Russia Inheritance</Card.Title>
                 <Card.Text>
-                  This system follows Russian inheritance laws for property distribution.
+                  This system follows Russian inheritance laws for property
+                  distribution.
                 </Card.Text>
                 <Button
                   onClick={() => handleGenerateResults("Russia Inheritance")}
@@ -453,7 +472,7 @@ const HomePage: React.FC = () => {
     //         <div className="card-body">
     //           <h5 className="card-title">India Inheritance System</h5>
     //           <p className="card-text">
-    //             This system calculates inheritance using India legal framework this is applied 
+    //             This system calculates inheritance using India legal framework this is applied
     //             for religions other than Hindu and Muslim and also for those who do not follow any religion.
     //           </p>
     //           <button
@@ -472,7 +491,7 @@ const HomePage: React.FC = () => {
     //         <div className="card-body">
     //           <h5 className="card-title">China Inheritance System</h5>
     //           <p className="card-text">
-    //             This system calculates inheritance using China's legal framework this is applied 
+    //             This system calculates inheritance using China's legal framework this is applied
     //             in the country.
     //           </p>
     //           <button
@@ -491,7 +510,7 @@ const HomePage: React.FC = () => {
     //         <div className="card-body">
     //           <h5 className="card-title">Russia Inheritance System</h5>
     //           <p className="card-text">
-    //             This system calculates inheritance using Russia's legal framework this is applied 
+    //             This system calculates inheritance using Russia's legal framework this is applied
     //             in the country.
     //           </p>
     //           <button
@@ -504,7 +523,7 @@ const HomePage: React.FC = () => {
     //         </div>
     //       </div>
     //     </div>
-      
+
     // </>
   );
 };
