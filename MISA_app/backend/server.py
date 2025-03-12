@@ -469,14 +469,22 @@ async def share_inheritance(data: dict):
 
         # Execute the script stored in the database
         json_result,results_for_db = execute_script_from_db(user_id, system_name)
+        # ✅ Ensure `json_result` and `results_for_db` are correctly formatted
+        if isinstance(json_result, dict):  # If already a dictionary, convert it properly
+            json_result = json.dumps(json_result, ensure_ascii=False)
+
+        if isinstance(results_for_db, dict): 
+            detailed_result = json.dumps(results_for_db, ensure_ascii=False)
+        else:
+            detailed_result = results_for_db  # In case it's already a JSON string
 
         # Store results in the db
         connection = connect_db()
         cursor = connection.cursor()
 
         # json_result = json.dumps(results_for_db)
-        json_result = json.dumps(json_result)
-        detailed_result = json.dumps(results_for_db)
+        # json_result = json.dumps(json_result)
+        # detailed_result = json.dumps(results_for_db)
 
         # query = """
         # INSERT INTO InheritanceResults (name, json_result, detailed_result, InheritanceSystem_idInheritanceSystem, Facts_id, Users_user_id)

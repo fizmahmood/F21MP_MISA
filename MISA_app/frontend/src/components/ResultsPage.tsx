@@ -66,6 +66,7 @@ const ResultsPage: React.FC = () => {
   const [facts, setFacts] = useState<Facts | null>(null);
 
 
+
   // Fetch facts based on Facts_id
   useEffect(() => {
     // const factsId = location.state?.facts_id;
@@ -128,6 +129,15 @@ const ResultsPage: React.FC = () => {
   return (
     <Container className="mt-4">
       <h2 className="text-center">{systemName}</h2>
+
+      <Card className="shadow-lg mb-4">
+        <Card.Header as="h4" className="text-center bg-primary text-white">
+          About the System
+        </Card.Header>
+        <Card.Body>
+          <p>Content from the backend goes here</p>
+        </Card.Body>
+      </Card>
 
       {/* ✅ Eligible Heirs */}
       <Card className="shadow-lg mb-4">

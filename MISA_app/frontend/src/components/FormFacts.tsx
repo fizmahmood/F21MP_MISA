@@ -142,10 +142,10 @@ export default function InheritanceForm() {
     e.preventDefault();
     console.log("✅ Submitting Data:", formData);
     try {
-    //   await axios.post("http://localhost:5001/store_details", formData);
-    //   navigate("/home"); // ✅ Redirect on success
+      await axios.post("http://localhost:5001/store_details", formData);
+      navigate("/home"); // ✅ Redirect on success
     } catch (error) {
-    //   console.error("Error:", error);
+      console.error("Error:", error);
     }
   };
 
