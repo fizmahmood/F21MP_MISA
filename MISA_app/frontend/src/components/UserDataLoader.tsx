@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
-import axios from "axios";
+// import axios from "axios";
+import { api } from "../api/api";
 
 const UserDataLoader: React.FC = () => {
   useEffect(() => {
@@ -12,8 +13,8 @@ const UserDataLoader: React.FC = () => {
       console.log("Generated new UUID:", userUUID);
 
       // Store new user UUID in backend
-      axios
-        .post("http://localhost:5001/generate_user", { uuid: userUUID })
+      api
+        .post("/generate_user", { uuid: userUUID })
         .then((response) =>
           console.log("User UUID stored:", response.data.message)
         )
@@ -30,8 +31,8 @@ const UserDataLoader: React.FC = () => {
       console.log("User ID:", parsedUserInfo?.UserID || "Not Found");
     } else {
       // Fetch from backend only if `userInfo` is missing
-      axios
-        .get(`http://localhost:5001/get_user/${userUUID}`)
+      api
+        .get(`/get_user/${userUUID}`)
         .then((response) => {
           if (response.data.success) {
             const userData = response.data.user_data;

@@ -5,4 +5,6 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   base: "/F21MP_MISA/",
+  build: {
+    outDir: "build",}
 })

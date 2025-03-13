@@ -30,78 +30,7 @@ const HomePage: React.FC = () => {
   //   // uuid: string;
   // } | null>(null);
 
-  // useEffect(() => {
-  //   const storedUserInfo = localStorage.getItem("userInfo");
-  //   const storedFactId = localStorage.getItem("facts_id");
-  //   const parsedUserInfo = JSON.parse(storedUserInfo);
-  //   if (storedUserInfo) {
-  //     try {
-
-  //       // const parsedFactId = JSON.parse(storedFactId);
-  //       if (parsedUserInfo.user_id ) {
-  //         setUser({
-  //           user_id: parsedUserInfo.user_id,
-  //           // facts_id: parseInt(storedFactId),
-  //           uuid: parsedUserInfo.uuid,
-  //         });
-  //       } else {
-  //         console.error("User ID not found in localStorage");
-  //       }
-  //     } catch (error) {
-  //       console.error("Error parsing userInfo from localStorage:", error);
-  //     }
-  //   }
-  //   if (storedFactId){
-  //       setFact({
-  //       user_id: parsedUserInfo.user_id,
-  //       facts_id: parseInt(storedFactId),
-  //       });
-  //   } else {
-  //     console.error("Facts ID not found in localStorage");
-  //     // Fetch facts id
-  //     api.get(`/get_facts/${user?.user_id}`)
-  //     .then((response) => {
-  //       if (response.data.success) {
-  //         const factsData = response.data.user_facts;
-  //         console.log("Facts data loaded:", factsData);
-  //         setFact({
-  //           user_id: user?.user_id,
-  //           facts_id: factsData.facts_id,
-  //         });
-  //         console.log(fact);
-  //       } else {
-  //         console.warn("Facts not found");
-  //         navigate("/welcome");
-  //       });
-  //     }
-  //   }
-  // }
-
-  //   // Fetch user data
-  //   // api
-  //   //   .get(`http://localhost:5001/get_user/${userUUID}`)
-  //   //   .then((response) => {
-  //   //     if (response.data.success) {
-  //   //       const userData = response.data.user_data;
-  //   //       console.log("User data loaded:", userData);
-
-  //   //       // ✅ Fix incorrect key name
-  //   //       setUser({
-  //   //         uuid: userData.uuid,
-  //   //         user_id: userData.idUser || 0, // Ensure correct key is used
-  //   //       });
-  //   //       console.log(user);
-  //   //     } else {
-  //   //       console.warn("User not found");
-  //   //       navigate("/welcome");
-  //   //     }
-  //   //   })
-  //   //   .catch((error) => {
-  //   //     console.error("Error retrieving user:", error);
-  //   //     navigate("/welcome");
-  //   //   })
-  //   //   .finally(() => setLoading(false));
-  // }, [navigate]);
+  
 
   useEffect(() => {
     const storedUserInfo = localStorage.getItem("userInfo");
