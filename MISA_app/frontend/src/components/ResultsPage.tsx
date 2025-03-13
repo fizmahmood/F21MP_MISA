@@ -254,11 +254,7 @@ const ResultsPage: React.FC = () => {
             </Card.Header>
             <Card.Body>
               <div style={{ height: "300px" }}>
-<<<<<<< Updated upstream
-                <Pie data={chartData} options={{ responsive: true }} />
-=======
                 <Pie data={pieChartData} options={{ responsive: true }} />
->>>>>>> Stashed changes
               </div>
             </Card.Body>
           </Card>
