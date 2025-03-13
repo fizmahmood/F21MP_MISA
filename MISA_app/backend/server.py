@@ -126,6 +126,10 @@ def execute_script_from_db(user_id, system_name):
 # API ROUTES
 #--------------------------------------------------------------------------------------------------------
 
+#= ROOT ==================================================================================================
+@app.get("/")  # Define a route for "/"
+def read_root():
+    return {"message": "Welcome to MISA API"}
 #= USER ==================================================================================================
 # Store user data in database
 @app.post("/generate_user")
