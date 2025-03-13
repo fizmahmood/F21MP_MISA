@@ -185,7 +185,7 @@ async def get_user(uuid: str):
     try:
         connection = connect_db()
         cursor = connection.cursor(dictionary=True)  # ✅ Ensures dict format
-        query = """SELECT user_id, uuid, created_on FROM users WHERE uuid = %s"""
+        query = """SELECT user_id, uuid, created_on FROM Users WHERE uuid = %s"""
         cursor.execute(query, (uuid,))
         user_data = cursor.fetchone()
         cursor.close()
