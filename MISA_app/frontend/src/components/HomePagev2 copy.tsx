@@ -78,7 +78,7 @@ const HomePage: React.FC = () => {
 
   //   // Fetch user data
   //   // api
-  //   //   .get(`http://localhost:5001/get_user/${userUUID}`)
+  //   //   .get(`/get_user/${userUUID}`)
   //   //   .then((response) => {
   //   //     if (response.data.success) {
   //   //       const userData = response.data.user_data;
@@ -170,7 +170,7 @@ const HomePage: React.FC = () => {
 
     // Call share_inheritance API
     api
-      .post("http://localhost:5001/share_inheritance", {
+      .post("/share_inheritance", {
         user_id: user.user_id,
         system_name: systemName,
         InheritanceSystem_id: 1, // Ensure this value exists in your database

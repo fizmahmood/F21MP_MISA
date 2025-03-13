@@ -24,7 +24,7 @@ const InheritanceResults = () => {
 
   useEffect(() => {
     if (!userId) return;
-    fetch(`http://localhost:5001/get_all_results/${userId}`)
+    fetch(`/get_all_results/${userId}`)
       .then((response) => response.json())
       .then((data) => {
         if (data.success) {
@@ -181,7 +181,7 @@ export default InheritanceResults;
 
 //   useEffect(() => {
 //     if (!userId) return;
-//     fetch(`http://localhost:5001/get_all_results/${userId}`)
+//     fetch(`/get_all_results/${userId}`)
 //       .then((response) => response.json())
 //       .then((data) => {
 //         if (data.success) {
@@ -372,7 +372,7 @@ export default InheritanceResults;
 
 // //   useEffect(() => {
 // //     if (!userId) return;
-// //     fetch(`http://localhost:5001/get_all_results/${userId}`)
+// //     fetch(`/get_all_results/${userId}`)
 // //       .then((response) => response.json())
 // //       .then((data) => {
 // //         if (data.success) {

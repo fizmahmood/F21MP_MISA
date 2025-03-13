@@ -100,7 +100,7 @@ const HomePage: React.FC = () => {
 
     // Call share_inheritance API
     api
-      .post("http://localhost:5001/share_inheritance", {
+      .post("/share_inheritance", {
         user_id: user.user_id,
         system_name: systemName,
         InheritanceSystem_id: 1, // Ensure this value exists in your database
