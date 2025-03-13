@@ -63,6 +63,8 @@ const ResultsPage: React.FC = () => {
     heirs: [],
     blocked_heirs: {},
   };
+  const context_info = location.state?.context_info;
+  console.log("Context: ", context_info);
   const [facts, setFacts] = useState<Facts | null>(null);
 
 
@@ -135,7 +137,7 @@ const ResultsPage: React.FC = () => {
           About the System
         </Card.Header>
         <Card.Body>
-          <p>Content from the backend goes here</p>
+          <p>{context_info}</p>
         </Card.Body>
       </Card>
 

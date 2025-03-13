@@ -515,9 +515,12 @@ if __name__ == "__main__":
     inheritance_results = inheritance_system.compute_inheritance()
     json_result = json.dumps(inheritance_results)
     results_for_db = inheritance_system.get_results_for_db()
+    context_info = """
+The China inheritance system is a system that involves the distribution of property among family members. Following a set of class of heirs which determines the distribution of property. The class of heirs are divided into two groups, the primary heirs and the secondary heirs. The primary heirs are the spouse and children of the deceased, while the secondary heirs are the parents and siblings of the deceased. The spouse and children of the deceased are entitled to a share of the property, while the parents and siblings of the deceased are entitled to a share of the property. The spouse and children of the deceased are entitled to a share of the property, while the parents and siblings of the deceased are entitled to a share of the property. The spouse and children of the deceased are entitled to a share of the property, while the parents and siblings of the deceased are entitled to a share of the property."""
     
     output = {
         "json_result": json_result,
-        "results_for_db": results_for_db
+        "results_for_db": results_for_db,
+        "context_info": context_info
     }
     print(json.dumps(output))

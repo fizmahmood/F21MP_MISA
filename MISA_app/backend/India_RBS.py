@@ -458,9 +458,13 @@ if __name__ == "__main__":
     inheritance_results = inheritance_system.compute_inheritance()
     json_result = json.dumps(inheritance_results)
     results_for_db = inheritance_system.get_results_for_db()
+    context_info = """
+The India inheritance system is based on the Indian Succession Act, 1925. The act applies to all Indian citizens. However, the act does not apply to Muslims, and Hindus. The heirs are classified into two categories: Class I heirs and Class II heirs. The Class I heirs are given priority over the Class II heirs. The Class I heirs include the widow, sons, daughters, and mother. The Class II heirs include the father, siblings, nephews, nieces and more."""
     
     output = {
         "json_result": json_result,
-        "results_for_db": results_for_db
+        "results_for_db": results_for_db,
+        "context_info": context_info
+
     }
     print(json.dumps(output))

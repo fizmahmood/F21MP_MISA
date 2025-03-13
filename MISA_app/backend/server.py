@@ -111,10 +111,12 @@ def execute_script_from_db(user_id, system_name):
 
         json_result = output_data.get("json_result", "{}") 
         results_for_db = output_data.get("results_for_db", {})
+        context_info = output_data.get("context_info", {})
+        
 
 
         # return json.loads(result.stdout)  # Convert script output to JSON
-        return json_result, results_for_db
+        return json_result, results_for_db, context_info
 
     except Exception as e:
         logging.error(f"❌ Script execution failed: {str(e)}")
@@ -468,7 +470,8 @@ async def share_inheritance(data: dict):
             raise HTTPException(status_code=400, detail="Missing user_id")
 
         # Execute the script stored in the database
-        json_result,results_for_db = execute_script_from_db(user_id, system_name)
+        json_result,results_for_db, context_info = execute_script_from_db(user_id, system_name)
+
         # ✅ Ensure `json_result` and `results_for_db` are correctly formatted
         if isinstance(json_result, dict):  # If already a dictionary, convert it properly
             json_result = json.dumps(json_result, ensure_ascii=False)
@@ -478,6 +481,9 @@ async def share_inheritance(data: dict):
         else:
             detailed_result = results_for_db  # In case it's already a JSON string
 
+        # script_output = json.loads(json_result)
+        # logging.info(f"Script output: {script_output}")
+        # context_info = script_output.get("context_info", {})
         # Store results in the db
         connection = connect_db()
         cursor = connection.cursor()
@@ -511,7 +517,8 @@ async def share_inheritance(data: dict):
 
         return {"success": True,
                  "json_result": json.loads(json_result),
-                 "results_for_db": results_for_db
+                 "results_for_db": results_for_db,
+                 "context_info": context_info
                  }
 
     except Exception as e:

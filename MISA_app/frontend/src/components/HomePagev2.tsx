@@ -295,6 +295,7 @@ const HomePage: React.FC = () => {
             system_name: selectedSystem,
             result: response.data.json_result,
             details: response.data.results_for_db,
+            context_info: response.data.context_info,
           },
         });
       } else {

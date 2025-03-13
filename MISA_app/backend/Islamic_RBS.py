@@ -1,3 +1,4 @@
+#Islamic Inheritance System
 import networkx as nx
 import matplotlib.pyplot as plt
 import sys
@@ -618,22 +619,6 @@ class InheritanceSystem:
         plt.axis('equal')  # Ensures a circular pie chart
         plt.show()
     
-        
-# ------------------ Example Usage ------------------
-# net_worth = 1000000  # Estate value
-# inheritance_system = InheritanceSystem(
-#     net_worth=net_worth,
-#     will=100000,
-#     father=0, mother=1, husband=1, wife=0, sons=1, daughters=0, 
-#     brothers=2, grandsons=0, granddaughters=0, grandfather=0, sisters = 1
-# )
-
-# # Compute inheritance and display results
-# inheritance_results = inheritance_system.compute_inheritance()
-# inheritance_system.display_results()
-# inheritance_system.plot_inheritance_tree()  # Visualize the inheritance tree
-# inheritance_system.plot_inheritance_pie_chart()  # Visualize inheritance distribution
-#------------------------------------------------------ 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         print("Usage: python Islamic_RBS.py <user_id>")
@@ -693,96 +678,12 @@ if __name__ == "__main__":
     # inheritance_results = inheritance_system.compute_inheritance()
     json_result = json.dumps(inheritance_results)
     results_for_db = inheritance_system.get_results_for_db()
+    context_info = """
+Islamic Inheritance System is based on the Quranic guidelines for the distribution of wealth among heirs. The rules are designed to ensure fair and just distribution of assets according to Islamic principles. The system considers various factors such as the presence of parents, spouses, children, siblings, and other relatives to determine the inheritance shares. In cases where the default distribution does not apply, the system provides for the allocation of residual shares to the remaining heirs. The system also accounts for any specific bequests (Wasiya) made by the deceased. The results of the inheritance calculation are presented in a structured decision tree and a pie chart for better visualization and understanding."""
     
     output = {
         "json_result": json_result,
-        "results_for_db": results_for_db
+        "results_for_db": results_for_db,
+        "context_info": context_info
     }
     print(json.dumps(output))
-
-    # Store Results in the Database
-    # store_results_in_db(user_id, facts_id, inheritance_system_id, json_result, results_for_db)
-    
-    # Print JSON Output for Debugging
-    # print("==========================================")
-    # print(json_result)
-    # print("==========================================")
-    # print(json.dumps(results_for_db, indent=4))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    # # if len(sys.argv) != 2:
-    # #     print("Usage: python Islamic_RBS.py <user_id>")
-    # #     sys.exit(1)
-
-    # # user_id = sys.argv[1]
-    # user_id = 2
-
-    # # Fetch inheritance data from database
-    # data = get_user_inheritance_data(user_id)
-
-    # # Initialize the inheritance system using fetched data
-    # inheritance_system = InheritanceSystem(
-    #     net_worth=data.get("networth", 0),
-    #     will=data.get("will_amount", 0),
-    #     father=data.get("father", 0),
-    #     mother=data.get("mother", 0),
-    #     husband=data.get("husband", 0),
-    #     wife=data.get("wife", 0),
-    #     sons=data.get("sons", 0),
-    #     daughters=data.get("daughters", 0),
-    #     brothers=data.get("brothers", 0),
-    #     sisters=data.get("sisters", 0),
-    #     grandsons=data.get("grandsons", 0),
-    #     granddaughters=data.get("granddaughters", 0),
-    #     grandfather=data.get("paternal_grandfather", 0),
-    #     grandmother=data.get("paternal_grandmother", 0)
-    # )
-
-    # # Compute inheritance
-    # inheritance_results = inheritance_system.compute_inheritance()
-    # results_for_db = inheritance_system.get_results_for_db()
-
-    # # Output results as JSON
-    # print(json.dumps(results_for_db))
-   
-    # if len(sys.argv) != 2:
-    #     print("Usage: python Islamic_RBS.py <json_data>")
-    #     sys.exit(1)
-
-    # json_data = sys.argv[1]
-    # data = json.loads(json_data)
-
-    # net_worth = data.get("net_worth", 0)
-    # inheritance_system = InheritanceSystem(
-    #     net_worth=net_worth,
-    #     will=data.get("will", 0),
-    #     father=data.get("father", 0),
-    #     mother=data.get("mother", 0),
-    #     husband=data.get("husband", 0),
-    #     wife=data.get("wife", 0),
-    #     sons=data.get("sons", 0),
-    #     daughters=data.get("daughters", 0),
-    #     brothers=data.get("brothers", 0),
-    #     sisters=data.get("sisters", 0),
-    #     grandsons=data.get("grandsons", 0),
-    #     granddaughters=data.get("granddaughters", 0),
-    #     grandfather=data.get("grandfather", 0),
-    #     grandmother=data.get("grandmother", 0)
-    # )
-
-    # # Compute inheritance and return results as JSON
-    # inheritance_results = inheritance_system.compute_inheritance()
-    # print(json.dumps(inheritance_results))
