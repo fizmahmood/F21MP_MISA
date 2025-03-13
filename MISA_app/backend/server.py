@@ -27,10 +27,17 @@ app.add_middleware(
 def connect_db():
     try:
         connection = mysql.connector.connect(
-            host="127.0.0.1",
-            user="root",
-            password="!fg121u03",
-            database="misa_db"
+            # host="127.0.0.1",
+            # user="root",
+            # password="!fg121u03",
+            # database="misa_db"
+            # Command Line to Use :- mysql -u um2005 -D um2005 -h 132.145.18.222 -p
+            host = "132.145.18.222",
+            user = "um2005",
+            password = "",
+            database = "um2005"
+
+
         )
         logging.info("Database connection successful")
         return connection
