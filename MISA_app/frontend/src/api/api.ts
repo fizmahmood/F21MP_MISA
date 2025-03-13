@@ -1,7 +1,9 @@
 import axios from "axios";
 
 // ✅ Use import.meta.env for Vite
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5001";
+// const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5001";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://f21mp-misa.onrender.com";
+
 
 export const api = axios.create({
   baseURL: API_BASE_URL,

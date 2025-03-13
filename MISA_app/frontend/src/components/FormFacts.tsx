@@ -10,7 +10,8 @@ import {
   Tooltip,
   OverlayTrigger,
 } from "react-bootstrap";
-import axios from "axios";
+// import axios from "axios";
+import { api } from "../api/api";
 import useUserInfo from "../hooks/useUserInfo";
 import { useNavigate } from "react-router-dom";
 
@@ -142,7 +143,8 @@ export default function InheritanceForm() {
     e.preventDefault();
     console.log("✅ Submitting Data:", formData);
     try {
-      await axios.post("http://localhost:5001/store_details", formData);
+      // await axios.post("http://localhost:5001/store_details", formData);
+      await api.post("/store_details", formData);
       navigate("/home"); // ✅ Redirect on success
     } catch (error) {
       console.error("Error:", error);
