@@ -34,7 +34,7 @@ def connect_db():
             # Command Line to Use :- mysql -u um2005 -D um2005 -h 132.145.18.222 -p
             host = "132.145.18.222",
             user = "um2005",
-            password = "",
+            password = "wnd4VKSANY3",
             database = "um2005"
 
 
