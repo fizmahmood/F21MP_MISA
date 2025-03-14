@@ -86,28 +86,40 @@ def execute_script_from_db(user_id, system_name):
         script_content = get_script_from_db(system_name)
         # logging.info("Script Content:",script_content)
 
-        # Write script to a temporary file
-        script_filename = f"temp_{system_name.replace(' ', '_')}.py"
-        with open(script_filename, "w", encoding="utf-8") as script_file:
-            script_file.write(script_content)
+        # Escape quotes and newlines for safe execution
+        safe_script = json.dumps(script_content)
 
-        # Execute the script and pass the user_id as an argument
-        # result = subprocess.run(
-        #     ["python3", script_filename, str(user_id)],
-        #     capture_output=True,
-        #     text=True
-        # )
-        logging.info(f"🔍 Running script {script_filename} for user {user_id}")
+        # Execute script using subprocess with `python -c`
+        logging.info(f"🔍 Running script for user {user_id} using inline execution.")
+
         result = subprocess.run(
-            [sys.executable, script_filename, str(user_id)],  # ✅ Works on all OS
-            capture_output=True,text=True
-            )
+            [sys.executable, "-c", f"import sys; user_id=sys.argv[1]; exec({safe_script})", str(user_id)],
+            capture_output=True, text=True
+        )
+
+
+        # Write script to a temporary file
+        # script_filename = f"temp_{system_name.replace(' ', '_')}.py"
+        # with open(script_filename, "w", encoding="utf-8") as script_file:
+        #     script_file.write(script_content)
+
+        # # Execute the script and pass the user_id as an argument
+        # # result = subprocess.run(
+        # #     ["python3", script_filename, str(user_id)],
+        # #     capture_output=True,
+        # #     text=True
+        # # )
+        # logging.info(f"🔍 Running script {script_filename} for user {user_id}")
+        # result = subprocess.run(
+        #     [sys.executable, script_filename, str(user_id)],  # ✅ Works on all OS
+        #     capture_output=True,text=True
+        #     )
         
         # logging.error(f"🔴 Script execution failed: {result.stderr.strip()}")  # ✅ Log error details
 
 
         # Cleanup: Remove the temporary script file
-        os.remove(script_filename)
+        # os.remove(script_filename)
 
         if result.returncode != 0:
             logging.error(f"❌ Script execution failed: {result.stderr.strip()}")

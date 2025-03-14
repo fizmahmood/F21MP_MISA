@@ -165,9 +165,9 @@ const HomePage: React.FC = () => {
       // ✅ Call `share_inheritance` with the fetched system data
       const response = await api.post("/share_inheritance", {
         user_id: user.user_id,
-        system_name: systemData.system_name,
+        system_name: systemName?.system_name,
         Facts_id: facts_id, // Ensure correct Facts_id is used
-        InheritanceSystem_id: systemData.idInheritanceSystem,
+        InheritanceSystem_id: systemName?.idInheritanceSystem,
       });
       
 
