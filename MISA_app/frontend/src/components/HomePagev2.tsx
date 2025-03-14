@@ -125,52 +125,7 @@ const HomePage: React.FC = () => {
       });
   }, [systemName, user]);
 
-  // const handleGenerateResults = async (selectedSystem: string) => {
-  //   if (!user) {
-  //     console.error("User data not available.");
-  //     return;
-  //   }
-
-  //   try {
-  //     const sysResponse = await api.get(`/get_system/${selectedSystem}`);
-
-  //     if (!sysResponse.data.success) {
-  //       console.error("System details not found:", sysResponse.data);
-  //       return;
-  //     }
-
-  //     const systemData = sysResponse.data.system; // ✅ Extract system data
-  //     console.log("Fetched system details:", systemData);
-  //     const response = await api.post("/share_inheritance", {
-  //       user_id: user.user_id,
-  //       system_name: selectedSystem,
-  //       // InheritanceSystem_id: 1, // Ensure this value exists in your database
-  //       Facts_id: user.facts_id, // Modify if necessary
-  //     });
-
-  //     if (response.data.success) {
-  //       console.log(
-  //         `Inheritance shared successfully for ${selectedSystem}:`,
-  //         response.data
-  //       );
-
-  //       // ✅ Navigate to Results Page and pass the results
-  //       navigate("/result", {
-  //         state: {
-  //           result: response.data.json_result,
-  //           details: response.data.results_for_db,
-  //         },
-  //       });
-  //     } else {
-  //       console.error(
-  //         `Failed to share inheritance for ${selectedSystem}:`,
-  //         response
-  //       );
-  //     }
-  //   } catch (error) {
-  //     console.error(`Error sharing inheritance for ${selectedSystem}:`, error);
-  //   }
-  // };
+  
 
   // if (loading) return <div>Loading...</div>;
   const handleGenerateResults = async (selectedSystem: string) => {
@@ -198,19 +153,23 @@ const HomePage: React.FC = () => {
         system_name: systemData.system_name,
       });
 
+        InheritanceSystem_id: systemData.idInheritanceSystem,
+      // 🛑 Add a delay to ensure `systemName` state updates before sending request
+    setTimeout(async () => {
+      console.log(`📡 Preparing to send API request with parameters:`);
+      console.log(`   - User ID: ${user.user_id}`);
+      console.log(`   - System Name: ${systemData.system_name}`);
+      console.log(`   - Inheritance System ID: ${systemData.idInheritanceSystem}`);
+      console.log(`   - Facts ID: ${facts_id}`);
+      
       // ✅ Call `share_inheritance` with the fetched system data
       const response = await api.post("/share_inheritance", {
         user_id: user.user_id,
-        system_name: systemName?.system_name,
+        system_name: systemData.system_name,
         Facts_id: facts_id, // Ensure correct Facts_id is used
-        InheritanceSystem_id: systemName?.idInheritanceSystem,
+        InheritanceSystem_id: systemData.idInheritanceSystem,
       });
-      // Extract system_name correctly
-      //     const response = await api.post("/share_inheritance", {
-      //       user_id: user.user_id,
-      //       system_name: systemData.system_name,  // ✅ Ensure only system_name is sent
-      //       Facts_id: facts_id,
-      // });
+      
 
       if (response.data.success) {
         console.log(
@@ -233,6 +192,7 @@ const HomePage: React.FC = () => {
           response
         );
       }
+      }, 1500); // Introduce a 1.5-second delay
     } catch (error) {
       console.error(
         `Error fetching system details or sharing inheritance:`,
