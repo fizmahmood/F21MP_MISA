@@ -137,6 +137,8 @@ def execute_script_from_db(user_id, system_name):
 
 
         result = subprocess.run(["python3", script_filename], capture_output=True, text=True)
+        logging.info(f"📜 STDOUT: {result.stdout.strip()}")
+        logging.error(f"🚨 STDERR: {result.stderr.strip()}")  # Capture detailed error
 
         logging.info(f"🟢 Step 5: Script execution completed.")
 
