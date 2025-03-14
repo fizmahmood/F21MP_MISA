@@ -125,6 +125,9 @@ def execute_script_from_db(user_id, system_name):
             logging.error(f"❌ Script execution failed: {result.stderr.strip()}")
             raise Exception(f"Error executing script: {result.stderr}")
         
+        logging.info(f"📜 STDOUT: {result.stdout.strip()}")
+        logging.error(f"🚨 STDERR: {result.stderr.strip()}")
+
         logging.info(f"✅ Script execution output: {result.stdout.strip()}")
         output_data = json.loads(result.stdout.strip())
 

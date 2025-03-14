@@ -1,6 +1,6 @@
 #   Hindu Inheritance System
-import networkx as nx
-import matplotlib.pyplot as plt
+# import networkx as nx
+# import matplotlib.pyplot as plt
 import sys
 import json
 import mysql.connector
