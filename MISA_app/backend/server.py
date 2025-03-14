@@ -99,9 +99,9 @@ def execute_script_from_db(user_id, system_name):
 
 
         # Write script to a temporary file
-        script_filename = f"temp_{system_name.replace(' ', '_')}.py"
-        with open(script_filename, "w", encoding="utf-8") as script_file:
-            script_file.write(script_content)
+        # script_filename = f"temp_{system_name.replace(' ', '_')}.py"
+        # with open(script_filename, "w", encoding="utf-8") as script_file:
+        #     script_file.write(script_content)
 
         # # Execute the script and pass the user_id as an argument
         # # result = subprocess.run(
@@ -110,13 +110,17 @@ def execute_script_from_db(user_id, system_name):
         # #     text=True
         # # )
         # logging.info(f"🔍 Running script {script_filename} for user {user_id}")
-        result = subprocess.run(
-            [sys.executable, script_filename, str(user_id)],  # ✅ Works on all OS
-            capture_output=True,text=True
-            )
+        # result = subprocess.run(
+        #     [sys.executable, script_filename, str(user_id)],  # ✅ Works on all OS
+        #     capture_output=True,text=True
+        #     )
         
         # logging.error(f"🔴 Script execution failed: {result.stderr.strip()}")  # ✅ Log error details
+        script_filename = "/tmp/inheritance_script.py"
+        with open(script_filename, "w", encoding="utf-8") as script_file:
+            script_file.write(script_content)  # Your script content from DB
 
+        result = subprocess.run(["python3", script_filename], capture_output=True, text=True)
 
         # Cleanup: Remove the temporary script file
         os.remove(script_filename)
