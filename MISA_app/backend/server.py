@@ -116,11 +116,29 @@ def execute_script_from_db(user_id, system_name):
         #     )
         
         # logging.error(f"🔴 Script execution failed: {result.stderr.strip()}")  # ✅ Log error details
+        
+        # ======================================================
         script_filename = "/tmp/inheritance_script.py"
+
+        # Ensure script directory exists
+        os.makedirs(os.path.dirname(script_filename), exist_ok=True)
+
+
         with open(script_filename, "w", encoding="utf-8") as script_file:
             script_file.write(script_content)  # Your script content from DB
 
+        logging.info(f"🟢 Step: Script successfully written to {script_filename}")
+
+        # Make script executable (Linux/MacOS only)
+        os.chmod(script_filename, 0o755)
+
+        # Execute the script and pass the user_id as an argument
+        logging.info(f"🟢 Step 4: Executing script '{script_filename}' with user_id {user_id}")
+
+
         result = subprocess.run(["python3", script_filename], capture_output=True, text=True)
+
+        logging.info(f"🟢 Step 5: Script execution completed.")
 
         # Cleanup: Remove the temporary script file
         os.remove(script_filename)

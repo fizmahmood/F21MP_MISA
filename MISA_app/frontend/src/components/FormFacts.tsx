@@ -70,12 +70,30 @@ export default function InheritanceForm() {
   const navigate = useNavigate();
 
   // ✅ Validation Rules
-  const maxFields = ["brothers", "sisters", "sons", "daughters", "grandsons", "granddaughters"];
+  const maxFields = [
+    "brothers",
+    "sisters",
+    "sons",
+    "daughters",
+    "grandsons",
+    "granddaughters",
+  ];
   const moneyFields = ["networth", "will_amount"];
-  const binaryFields = ["father", "mother", "husband", "wife", "paternal_grandfather", "paternal_grandmother", "maternal_grandfather", "maternal_grandmother"];
+  const binaryFields = [
+    "father",
+    "mother",
+    "husband",
+    "wife",
+    "paternal_grandfather",
+    "paternal_grandmother",
+    "maternal_grandfather",
+    "maternal_grandmother",
+  ];
 
   // ✅ Function to render tooltips
-  const renderTooltip = (message: string) => <Tooltip id="tooltip">{message}</Tooltip>;
+  const renderTooltip = (message: string) => (
+    <Tooltip id="tooltip">{message}</Tooltip>
+  );
 
   // ✅ Set `Users_user_id` when user info is loaded
   useEffect(() => {
@@ -102,9 +120,12 @@ export default function InheritanceForm() {
 
     if (binaryFields.includes(name) && ![0, 1].includes(value)) {
       errorMessage = "Must be 0 or 1";
-    } else if (maxFields.includes(name) && (value < 0 || value > 31 )) {
+    } else if (maxFields.includes(name) && (value < 0 || value > 31)) {
       errorMessage = "Must be between 0 and 30";
-    } else if (moneyFields.includes(name) && value < 0 || value > 9999999999) {
+    } else if (
+      (moneyFields.includes(name) && value < 0) ||
+      value > 9999999999
+    ) {
       errorMessage = "Max value is 9,999,999,999";
     }
 
@@ -124,7 +145,11 @@ export default function InheritanceForm() {
 
     if (type === "checkbox") {
       updatedValue = checked ? 1 : 0;
-    } else if (binaryFields.includes(name) || maxFields.includes(name) || moneyFields.includes(name)) {
+    } else if (
+      binaryFields.includes(name) ||
+      maxFields.includes(name) ||
+      moneyFields.includes(name)
+    ) {
       updatedValue = numericValue;
     } else {
       updatedValue = value;
@@ -166,7 +191,7 @@ export default function InheritanceForm() {
                   <Row>
                     <Col md={6}>
                       <Form.Label>Gender:</Form.Label>
-                      <div >
+                      <div>
                         <Form.Check
                           inline
                           type="radio"
@@ -189,7 +214,7 @@ export default function InheritanceForm() {
                     </Col>
                     <Col md={6}>
                       <Form.Label>Married?</Form.Label>
-                      <div >
+                      <div>
                         <Form.Check
                           inline
                           type="radio"
@@ -325,7 +350,9 @@ export default function InheritanceForm() {
                             onChange={handleChange}
                             required
                           />
-                          {errors.sons && <div className="text-danger">{errors.sons}</div>}
+                          {errors.sons && (
+                            <div className="text-danger">{errors.sons}</div>
+                          )}
                         </Form.Group>
                       </Col>
                       <Col md={6}>
@@ -340,7 +367,11 @@ export default function InheritanceForm() {
                             onChange={handleChange}
                             required
                           />
-                          {errors.daughters && <div className="text-danger">{errors.daughters}</div>}
+                          {errors.daughters && (
+                            <div className="text-danger">
+                              {errors.daughters}
+                            </div>
+                          )}
                         </Form.Group>
                       </Col>
                     </Row>
@@ -359,7 +390,9 @@ export default function InheritanceForm() {
                           onChange={handleChange}
                           required
                         />
-                        {errors.brothers && <div className="text-danger">{errors.brothers}</div>}
+                        {errors.brothers && (
+                          <div className="text-danger">{errors.brothers}</div>
+                        )}
                       </Form.Group>
                     </Col>
                     <Col md={6}>
@@ -374,7 +407,9 @@ export default function InheritanceForm() {
                           onChange={handleChange}
                           required
                         />
-                        {errors.sisters && <div className="text-danger">{errors.sisters}</div>}
+                        {errors.sisters && (
+                          <div className="text-danger">{errors.sisters}</div>
+                        )}
                       </Form.Group>
                     </Col>
                   </Row>
@@ -385,87 +420,86 @@ export default function InheritanceForm() {
                 <CardBody>
                   {/* Net Worth & Will */}
                   <Row>
-                  <Col md={6}>
-                  <Form.Group className="mt-3">
-                    <Form.Label>
-                      Net Worth ($):
-                      <OverlayTrigger
-                        placement="top"
-                        overlay={renderTooltip(
-                          "This is the total value of your assets."
-                        )}
-                      >
-                        <span
-                          className="text-primary ms-2"
-                          style={{ cursor: "pointer" }}
-                        >
-                          ⓘ
-                        </span>
-                      </OverlayTrigger>
-                    </Form.Label>
+                    <Col md={6}>
+                      <Form.Group className="mt-3">
+                        <Form.Label>
+                          Net Worth ($):
+                          <OverlayTrigger
+                            placement="top"
+                            overlay={renderTooltip(
+                              "This is the total value of your assets."
+                            )}
+                          >
+                            <span
+                              className="text-primary ms-2"
+                              style={{ cursor: "pointer" }}
+                            >
+                              ⓘ
+                            </span>
+                          </OverlayTrigger>
+                        </Form.Label>
 
-                    <div className="input-group">
-                      <span className="input-group-text">$</span>
-                      <Form.Control
-                        type="number"
-                        name="networth"
-                        min="0"
-                        max="999999999999"
-                        value={formData.networth}
-                        onChange={handleChange}
-                        className="form-control"
-                        aria-label="Networth (in dollars)"
-                        required
-                      />
-                      <span className="input-group-text">.00</span>
-                    </div>
-                    {errors.networth && (
-                      <div className="text-danger">{errors.networth}</div>
-                    )}
-                  </Form.Group>
-                  </Col>
-                  <Col md={6}>
-                  <Form.Group className="mt-3">
-                    <Form.Label>
-                      Will Amount ($):
-                      <OverlayTrigger
-                        placement="top"
-                        overlay={renderTooltip(
-                          "In the application, we ask for net worth and will amount; however, some inheritance-sharing frameworks impose limitations on the will amount. For instance, Islamic inheritance follows the Wasiyya rule, which allows a maximum of one-third (⅓) of the total net worth, while Brazil limits it to 50%, and other systems have their own restrictions."
+                        <div className="input-group">
+                          <span className="input-group-text">$</span>
+                          <Form.Control
+                            type="number"
+                            name="networth"
+                            min="0"
+                            max="999999999999"
+                            value={formData.networth}
+                            onChange={handleChange}
+                            className="form-control"
+                            aria-label="Networth (in dollars)"
+                            required
+                          />
+                          <span className="input-group-text">.00</span>
+                        </div>
+                        {errors.networth && (
+                          <div className="text-danger">{errors.networth}</div>
                         )}
-                      >
-                        <span
-                          className="text-primary ms-2"
-                          style={{ cursor: "pointer" }}
-                        >
-                          ⓘ
-                        </span>
-                      </OverlayTrigger>
-                    </Form.Label>
+                      </Form.Group>
+                    </Col>
+                    <Col md={6}>
+                      <Form.Group className="mt-3">
+                        <Form.Label>
+                          Will Amount ($):
+                          <OverlayTrigger
+                            placement="top"
+                            overlay={renderTooltip(
+                              "In the application, we ask for net worth and will amount; however, some inheritance-sharing frameworks impose limitations on the will amount. For instance, Islamic inheritance follows the Wasiyya rule, which allows a maximum of one-third (⅓) of the total net worth, while Brazil limits it to 50%, and other systems have their own restrictions."
+                            )}
+                          >
+                            <span
+                              className="text-primary ms-2"
+                              style={{ cursor: "pointer" }}
+                            >
+                              ⓘ
+                            </span>
+                          </OverlayTrigger>
+                        </Form.Label>
 
-                    <div className="input-group">
-                      <span className="input-group-text">$</span>
-                      <Form.Control
-                        type="number"
-                        name="will_amount"
-                        min="0"
-                        value={formData.will_amount}
-                        onChange={handleChange}
-                        className="form-control"
-                        aria-label="Will Amount (in dollars)"
-                        required
-                      />
-                      <span className="input-group-text">.00</span>
-                    </div>
-                    {errors.will_amount && (
-                      <div className="text-danger">{errors.will_amount}</div>
-                    )}
-                  </Form.Group>
-                  </Col>
+                        <div className="input-group">
+                          <span className="input-group-text">$</span>
+                          <Form.Control
+                            type="number"
+                            name="will_amount"
+                            min="0"
+                            value={formData.will_amount}
+                            onChange={handleChange}
+                            className="form-control"
+                            aria-label="Will Amount (in dollars)"
+                            required
+                          />
+                          <span className="input-group-text">.00</span>
+                        </div>
+                        {errors.will_amount && (
+                          <div className="text-danger">
+                            {errors.will_amount}
+                          </div>
+                        )}
+                      </Form.Group>
+                    </Col>
                   </Row>
-                
-            
-                  
                 </CardBody>
               </Card>
 
