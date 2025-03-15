@@ -566,7 +566,8 @@ async def share_inheritance(data: dict):
             raise HTTPException(status_code=400, detail="Missing user_id")
 
         # Execute the script stored in the database
-        json_result,results_for_db, context_info = execute_script_from_db(user_id, system_name)
+        # json_result,results_for_db, context_info = execute_script_from_db(user_id, system_name)
+        json_result,results_for_db, context_info = safe_execute_script(user_id, system_name)
 
         # ✅ Ensure `json_result` and `results_for_db` are correctly formatted
         if isinstance(json_result, dict):  # If already a dictionary, convert it properly
