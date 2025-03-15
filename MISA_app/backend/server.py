@@ -186,7 +186,16 @@ def safe_execute_script(user_id, system_name):
             "int": int,
             "float": float,
             "abs": abs,
-            "__import__": __import__
+            "__import__": __import__,
+            "dict": dict,
+            "setattr": setattr,  
+            "getattr": getattr,  
+            "isinstance": isinstance,  
+            "issubclass": issubclass,  
+            "super": super,
+            "map": map,
+            "filter": filter,
+            "zip": zip
         }
 
         # ✅ Safe execution namespace (allows necessary imports)
