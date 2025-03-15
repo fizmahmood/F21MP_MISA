@@ -209,7 +209,11 @@ def safe_execute_script(user_id, system_name):
         safe_globals = {
             "__builtins__": allowed_builtins,  
             "json_result": "{}",  # Default output
-            "user_id": user_id
+            "user_id": user_id,
+            "user_facts": user_facts,
+            "results_for_db": {},
+            "context_info": ""
+
         }
 
         # ✅ Define a safe `exec` wrapper
