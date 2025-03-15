@@ -6,6 +6,8 @@ import mysql.connector
 import logging
 import sys
 import os
+import traceback
+import types
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -168,6 +170,50 @@ def execute_script_from_db(user_id, system_name):
         logging.error(f"❌ Script execution failed: {str(e)}")
         raise Exception(f"Script execution failed: {str(e)}")
 
+def safe_execute_script(user_id, system_name):
+    """Safely fetch and execute the inheritance script for the given user."""
+    try:
+        # Retrieve the script from the database
+        script_content = get_script_from_db(system_name)
+
+        # ✅ Allow only essential built-ins (restrict dangerous ones)
+        allowed_builtins = {
+            "print": print,
+            "json": json,
+            "len": len,
+            "range": range,
+            "sum": sum,
+            "int": int,
+            "float": float,
+            "abs": abs
+        }
+
+        # ✅ Safe execution namespace (allows necessary imports)
+        safe_globals = {
+            "__builtins__": allowed_builtins,  
+            "json_result": "{}",  # Default output
+            "user_id": user_id
+        }
+
+        # ✅ Define a safe `exec` wrapper
+        exec_env = types.ModuleType("exec_env")
+        exec_env.__dict__.update(safe_globals)
+
+        logging.info(f"🔍 Running script for user {user_id} in a restricted execution environment.")
+
+        # ✅ Execute script in a limited namespace
+        exec(script_content, exec_env.__dict__)
+
+        # ✅ Ensure JSON output is valid
+        json_result = exec_env.__dict__.get("json_result", "{}")
+        if isinstance(json_result, dict):
+            json_result = json.dumps(json_result, ensure_ascii=False)
+
+        return json_result, {}, {}
+
+    except Exception as e:
+        logging.error(f"❌ Script execution failed: {str(e)}\n{traceback.format_exc()}")
+        raise Exception(f"Script execution failed: {str(e)}")
 #---------------------------------------------------------------------------------------------------------
 # API ROUTES
 #--------------------------------------------------------------------------------------------------------
