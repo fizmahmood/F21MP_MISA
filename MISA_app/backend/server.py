@@ -185,7 +185,8 @@ def safe_execute_script(user_id, system_name):
             "sum": sum,
             "int": int,
             "float": float,
-            "abs": abs
+            "abs": abs,
+            "__import__": __import__
         }
 
         # ✅ Safe execution namespace (allows necessary imports)
