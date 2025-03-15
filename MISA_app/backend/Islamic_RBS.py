@@ -1,6 +1,6 @@
 #Islamic Inheritance System
-import networkx as nx
-import matplotlib.pyplot as plt
+# import networkx as nx
+# import matplotlib.pyplot as plt
 import sys
 import json
 import mysql.connector
@@ -628,33 +628,33 @@ if __name__ == "__main__":
     # user_id = 2
 
     # Fetch user facts
-    connection = connect_db()
-    cursor = connection.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM Facts WHERE Users_user_id = %s", (user_id,))
-    user_data = cursor.fetchone()
-    cursor.close()
-    connection.close()
+    # connection = connect_db()
+    # cursor = connection.cursor(dictionary=True)
+    # cursor.execute("SELECT * FROM Facts WHERE Users_user_id = %s", (user_id,))
+    # user_data = cursor.fetchone()
+    # cursor.close()
+    # connection.close()
 
-    if not user_data:
-        print(f"❌ No facts found for user {user_id}")
-        sys.exit(1)
+    # if not user_data:
+    #     print(f"❌ No facts found for user {user_id}")
+    #     sys.exit(1)
 
     # Extract `facts_id`
     facts_id = user_data["facts_id"]
 
-    # Find InheritanceSystem ID (Islamic System)
-    connection = connect_db()
-    cursor = connection.cursor()
-    cursor.execute("SELECT idInheritanceSystem FROM InheritanceSystem WHERE system_name = %s", ("Islamic Inheritance",))
-    inheritance_system_data = cursor.fetchone()
-    cursor.close()
-    connection.close()
+    # # Find InheritanceSystem ID (Islamic System)
+    # connection = connect_db()
+    # cursor = connection.cursor()
+    # cursor.execute("SELECT idInheritanceSystem FROM InheritanceSystem WHERE system_name = %s", ("Islamic Inheritance",))
+    # inheritance_system_data = cursor.fetchone()
+    # cursor.close()
+    # connection.close()
 
-    if not inheritance_system_data:
-        print(f"❌ No matching inheritance system found.")
-        sys.exit(1)
+    # if not inheritance_system_data:
+    #     print(f"❌ No matching inheritance system found.")
+    #     sys.exit(1)
 
-    inheritance_system_id = inheritance_system_data[0]
+    # inheritance_system_id = inheritance_system_data[0]
 
     # Run Inheritance Calculation
     inheritance_system = InheritanceSystem(

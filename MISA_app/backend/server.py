@@ -172,6 +172,12 @@ def execute_script_from_db(user_id, system_name):
 
 def safe_execute_script(user_id, system_name):
     """Safely fetch and execute the inheritance script for the given user."""
+    
+    # ✅ Fetch user facts from database
+    user_facts = get_facts(user_id)
+    if not user_facts:
+        return json.dumps({"error": f"No user facts found for user {user_id}"}), {}, {}
+
     try:
         # Retrieve the script from the database
         script_content = get_script_from_db(system_name)
@@ -217,10 +223,14 @@ def safe_execute_script(user_id, system_name):
 
         # ✅ Ensure JSON output is valid
         json_result = exec_env.__dict__.get("json_result", "{}")
+        results_for_db = exec_env.__dict__.get("results_for_db", {})
+        context_info = exec_env.__dict__.get("context_info", "")
+
+
         if isinstance(json_result, dict):
             json_result = json.dumps(json_result, ensure_ascii=False)
 
-        return json_result, {}, {}
+        return json_result, results_for_db, context_info
 
     except Exception as e:
         logging.error(f"❌ Script execution failed: {str(e)}\n{traceback.format_exc()}")

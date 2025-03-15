@@ -5,10 +5,14 @@ def connect_db():
     """Establish connection to MySQL database."""
     try:
         connection = mysql.connector.connect(
-            host="127.0.0.1",
-            user="root",
-            password="!fg121u03",  # Replace with your actual password
-            database="misa_db"
+            # host="127.0.0.1",
+            # user="root",
+            # password="!fg121u03",  # Replace with your actual password
+            # database="misa_db"
+            host = "132.145.18.222",
+            user = "um2005",
+            password = "wnd4VKSANY3",
+            database = "um2005"
         )
         return connection
     except mysql.connector.Error as err:
