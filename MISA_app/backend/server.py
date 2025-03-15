@@ -187,6 +187,7 @@ def safe_execute_script(user_id, system_name):
             "float": float,
             "abs": abs,
             "__import__": __import__,
+            "__build_class__": __build_class__,
             "dict": dict,
             "setattr": setattr,  
             "getattr": getattr,  
