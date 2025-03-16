@@ -170,11 +170,20 @@ def execute_script_from_db(user_id, system_name):
         logging.error(f"❌ Script execution failed: {str(e)}")
         raise Exception(f"Script execution failed: {str(e)}")
 
+def fetch_user_facts(user_id):
+    connection = connect_db()
+    cursor = connection.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM Facts WHERE Users_user_id = %s", (user_id,))
+    user_facts = cursor.fetchone()
+    cursor.close()
+    connection.close()
+    return user_facts
+
 def safe_execute_script(user_id, system_name):
     """Safely fetch and execute the inheritance script for the given user."""
     
     # ✅ Fetch user facts from database
-    user_facts = get_facts(user_id)
+    user_facts = fetch_user_facts(user_id)
     if not user_facts:
         return json.dumps({"error": f"No user facts found for user {user_id}"}), {}, {}
 

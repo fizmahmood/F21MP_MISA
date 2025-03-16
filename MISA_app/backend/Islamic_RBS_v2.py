@@ -1,82 +1,8 @@
-#Islamic Inheritance System
-# import networkx as nx
-# import matplotlib.pyplot as plt
+#Islamic Inheritance Calculation
 import sys
 import json
-import mysql.connector
+
 from decimal import Decimal 
-
-
-#---------------------------------------------------------------------------------------------------------
-# DATABASE INTERACTION
-#--------------------------------------------------------------------------------------------------------
-    
-def connect_db():
-        """Establish connection to MySQL database."""
-        try:
-            connection = mysql.connector.connect(
-                host="127.0.0.1",
-                user="root",
-                password="!fg121u03",  # Update with your actual password
-                database="misa_db"
-            )
-            return connection
-        except mysql.connector.Error as err:
-            print(f"❌ Database connection error: {err}")
-            sys.exit(1)
-
-def get_user_inheritance_data(user_id):
-        """Retrieve inheritance data from the database based on user_id."""
-        connection = connect_db()
-        cursor = connection.cursor(dictionary=True)
-
-        try:
-            query = """SELECT * FROM Facts WHERE Users_user_id = %s"""
-            cursor.execute(query, (user_id,))
-            data = cursor.fetchone()
-            cursor.close()
-            connection.close()
-
-            if data:
-                return data
-            else:
-                print(f"❌ No inheritance data found for User ID: {user_id}")
-                sys.exit(1)
-
-        except mysql.connector.Error as err:
-            print(f"❌ Error fetching user data: {err}")
-            sys.exit(1)
-
-def store_results_in_db(user_id, facts_id, inheritance_system_id, results_for_db, detailed_results):
-    """Stores inheritance results in the database."""
-    connection = connect_db()
-    cursor = connection.cursor()
-
-    try:
-        json_result = json.dumps(results_for_db)  # Convert results to JSON
-        detailed_result = json.dumps(detailed_results)  # Convert detailed breakdown to JSON
-
-        query = """
-        INSERT INTO InheritanceResults (name, json_result, detailed_result, InheritanceSystem_idInheritanceSystem, Facts_id, Users_user_id)
-        VALUES (%s, %s, %s, %s, %s, %s)
-        ON DUPLICATE KEY UPDATE
-            json_result = VALUES(json_result),
-            detailed_result = VALUES(detailed_result),
-            InheritanceSystem_idInheritanceSystem = VALUES(InheritanceSystem_idInheritanceSystem),
-            Facts_id = VALUES(Facts_id)
-        """
-        values = ("Islamic Inheritance", json_result, detailed_result, inheritance_system_id, facts_id, user_id)
-
-        cursor.execute(query, values)
-        connection.commit()
-        print(f"✅ Inheritance results stored for user {user_id}.")
-
-    except mysql.connector.Error as err:
-        print(f"❌ Error inserting inheritance results: {err}")
-
-    finally:
-        cursor.close()
-        connection.close()
         
 #---------------------------------------------------------------------------------------------------------
 # InheritanceSystem
@@ -197,39 +123,6 @@ class InheritanceSystem:
             self.blocked_heirs['grandmother'] = "Grandmother is blocked because the mother is alive."
             self.grandmother = 0
 
-    # ----------------------------------------------------
-    # def get_results_for_db(self):
-    #     """Return inheritance distribution in a format suitable for database storage."""
-    #     results_for_db = {
-    #         "original_net_worth": self.original_net_worth,
-    #         "net_worth": self.net_worth,
-    #         "will": self.results.get("will", 0),
-    #         "total_distributed": sum(value for key, value in self.results.items() if key != "will"),
-    #         "remaining_residue": self.residue,
-    #         "heirs": [],
-    #         "blocked_heirs": self.blocked_heirs
-    #     }
-
-    #     for heir, amount in self.results.items():
-    #         if heir == "will":
-    #             continue
-
-    #         base_heir = heir.replace("each_", "")
-    #         count_attr = base_heir + "s"
-    #         count = getattr(self, count_attr, 1)
-    #         # percentage = (amount / self.original_net_worth) * 100 if self.original_net_worth > 0 else 0
-    #         percentage = (amount / float(self.original_net_worth)) * 100 if float(self.original_net_worth) > 0 else 0
-
-    #         heir_data = {
-    #             "heir": base_heir,
-    #             "count": count,
-    #             "amount": amount,
-    #             "percentage": percentage,
-    #             "explanation": self.explanations.get(heir, "No specific rule applied.")
-    #         }
-    #         results_for_db["heirs"].append(heir_data)
-
-    #     return results_for_db
 
     def get_results_for_db(self):
         """Return inheritance distribution in a format suitable for database storage."""
@@ -499,199 +392,42 @@ class InheritanceSystem:
         self.residue = 0
     
     
+print("✅ Islamic Inheritance Script started...")
 
-    # def plot_inheritance_tree(self):
-    #     """Generate a structured decision tree with heir counts and blocking reasons."""
-    #     G = nx.DiGraph()
+if "error" in user_facts:
+    print("❌ user_facts is empty or invalid")
+    json_result = {}
+    results_for_db = {}
+    context_info = "Error: user_facts missing"
+else:
+    print(f"✅ user_facts received: {user_facts}")
 
-    #     # Add root node (Deceased)
-    #     G.add_node("Deceased", subset=0, color="red", label="Deceased")
-
-    #     # Define colors for inheritance status
-    #     heir_color = "green"  # Fixed share heirs
-    #     residual_color = "green"  # Residual heirs (Asaba)
-    #     blocked_color = "gray"  # Blocked heirs
-
-    #     # Categorize heirs into groups
-    #     fixed_heirs = []
-    #     residual_heirs = []
-    #     blocked_heirs = []
-
-    #     # Add fixed share heirs (e.g., father, mother, spouse)
-    #     for heir, amount in self.fixed_shares.items():
-    #         count = getattr(self, heir, 1)  # Get the count of heirs
-    #         heir_label = f"{heir.capitalize()} \n({count})"  # Format as "Father (1)"
-            
-    #         G.add_node(heir, subset=1, color=heir_color, label=heir_label)
-    #         G.add_edge("Deceased", heir, label=f"${amount:,.2f}")
-    #         fixed_heirs.append(heir)
-
-    #     # Add residual heirs (Asaba - Sons, Daughters, etc.)
-    #     for heir, amount in self.results.items():
-    #         if heir.startswith("each_"):  # Check for Asaba heirs
-    #             base_heir = heir.replace("each_", "")
-    #             count = getattr(self, base_heir + "s", 1)  # Get heir count dynamically
-    #             heir_label = f"{base_heir.capitalize()} \n({count})"  # Format as "Son (2)"
-                
-    #             G.add_node(base_heir, subset=2, color=residual_color, label=heir_label)
-    #             G.add_edge("Deceased", base_heir, label=f"${amount:,.2f}")
-    #             residual_heirs.append(base_heir)
-
-    #     # Add blocked heirs with reasons
-    #     for heir, reason in self.blocked_heirs.items():
-    #         count = getattr(self, heir, 1)  # Get heir count dynamically
-    #         heir_label = f"{heir.capitalize()}"  # Format as "Brothers (2) ❌"
-            
-    #         G.add_node(heir, subset=3, color=blocked_color, label=heir_label)
-    #         G.add_edge("Deceased", heir, label="BLOCKED")
-    #         blocked_heirs.append(heir)
-
-    #     # Assign subset attributes to nodes for multipartite layout
-    #     node_labels = nx.get_node_attributes(G, "label")
-    #     subset_dict = nx.get_node_attributes(G, "subset")
-
-    #     try:
-    #         pos = nx.multipartite_layout(G, subset_key="subset")  # Structured layout
-    #     except:
-    #         pos = nx.shell_layout(G)  # Fallback to shell layout if needed
-
-    #     # Draw the tree
-    #     plt.figure(figsize=(12, 8))
-    #     node_colors = [G.nodes[n]["color"] for n in G.nodes]
-
-    #     nx.draw(G, pos, labels=node_labels, with_labels=True, node_size=3000, node_color=node_colors, edge_color="black", font_size=10, font_weight="bold")
-        
-    #     # Add edge labels for better readability
-    #     edge_labels = {(u, v): G.edges[u, v]["label"] for u, v in G.edges}
-    #     nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, font_size=9, bbox=dict(facecolor="white", edgecolor="none", alpha=0.6))
-
-    #     plt.title("Structured Islamic Inheritance Decision Tree")
-    #     plt.show()
-
-   
-
-
-    # def plot_inheritance_pie_chart(self):
-    #     """Generate a pie chart to visualize inheritance distribution with amounts, percentages, and counts."""
-
-    #     # Prepare data: Remove blocked heirs and Wasiya (Will)
-    #     data = {heir: amount for heir, amount in self.fixed_shares.items() if heir != "will"}
-
-    #     # Add Residual Shares (Asaba)
-    #     for heir, amount in self.results.items():
-    #         if heir.startswith("each_"):  # Residual heirs
-    #             base_heir = heir.replace("each_", "")
-    #             count = getattr(self, base_heir + "s", 1)  # Get the correct count
-    #             total_amount = amount * count  # Multiply by count for total share
-    #             data[base_heir] = total_amount
-
-    #     # Ensure there is data to plot
-    #     total_distributed = sum(data.values())
-    #     if total_distributed == 0:
-    #         print("No valid inheritance distribution to display.")
-    #         return
-
-    #     # **Convert keys to proper labels**
-    #     labels = []
-    #     sizes = []
-
-    #     for heir, amount in data.items():
-    #         count = getattr(self, heir + "s", 1)  # Get correct count (plural)
-    #         percentage = (amount / total_distributed) * 100  # Calculate percentage
-
-    #         # Format label with count, amount, and percentage
-    #         labels.append(f"{heir.capitalize()} (Count: {count})\n${amount:,.2f} ({percentage:.1f}%)")
-    #         sizes.append(amount)
-
-    #     # **Plot Pie Chart**
-    #     plt.figure(figsize=(9, 9))
-    #     wedges, texts, autotexts = plt.pie(
-    #         sizes, labels=labels, autopct='%1.1f%%', startangle=140, 
-    #         colors=plt.cm.Paired.colors, textprops={'fontsize': 10}
-    #     )
-
-    #     # **Customize text appearance**
-    #     for text, autotext in zip(texts, autotexts):
-    #         text.set_fontsize(10)  # Set heir labels font size
-    #         autotext.set_fontsize(10)  # Set percentage labels font size
-
-    #     plt.title("Inheritance Distribution Pie Chart", fontsize=12)
-    #     plt.axis('equal')  # Ensures a circular pie chart
-    #     plt.show()
-    
-if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Usage: python Islamic_RBS.py <user_id>")
-        sys.exit(1)
-
-    user_id = sys.argv[1]
-    # user_id = 2
-
-    # Fetch user facts
-    connection = connect_db()
-    cursor = connection.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM Facts WHERE Users_user_id = %s", (user_id,))
-    user_data = cursor.fetchone()
-    cursor.close()
-    connection.close()
-
-    # if not user_data:
-    #     print(f"❌ No facts found for user {user_id}")
-    #     sys.exit(1)
-
-    # Extract `facts_id`
-    facts_id = user_data["facts_id"]
-    print(f"🔍 Debug: Received user_facts = {user_facts}")
-
-    if "error" in user_facts:
-        print(f"❌ Error: {user_facts['error']}")
-        sys.exit(1)
-    
-
-    # # Find InheritanceSystem ID (Islamic System)
-    # connection = connect_db()
-    # cursor = connection.cursor()
-    # cursor.execute("SELECT idInheritanceSystem FROM InheritanceSystem WHERE system_name = %s", ("Islamic Inheritance",))
-    # inheritance_system_data = cursor.fetchone()
-    # cursor.close()
-    # connection.close()
-
-    # if not inheritance_system_data:
-    #     print(f"❌ No matching inheritance system found.")
-    #     sys.exit(1)
-
-    # inheritance_system_id = inheritance_system_data[0]
-
-    # Run Inheritance Calculation
     inheritance_system = InheritanceSystem(
-        net_worth=float(user_data.get("networth", 0)),  # Convert Decimal to float
-        will=float(user_data.get("will_amount", 0)),
-        father=user_data.get("father", 0),
-        mother=user_data.get("mother", 0),
-        husband=user_data.get("husband", 0),
-        wife=user_data.get("wife", 0),
-        sons=user_data.get("sons", 0),
-        daughters=user_data.get("daughters", 0),
-        brothers=user_data.get("brothers", 0),
-        sisters=user_data.get("sisters", 0),
-        grandsons=user_data.get("grandsons", 0),
-        granddaughters=user_data.get("granddaughters", 0),
-        grandfather=user_data.get("paternal_grandfather", 0),
-        grandmother=user_data.get("paternal_grandmother", 0)
+        net_worth=float(user_facts.get("networth", 0)),
+        will=float(user_facts.get("will_amount", 0)),
+        father=user_facts.get("father", 0),
+        mother=user_facts.get("mother", 0),
+        husband=user_facts.get("husband", 0),
+        wife=user_facts.get("wife", 0),
+        sons=user_facts.get("sons", 0),
+        daughters=user_facts.get("daughters", 0),
+        brothers=user_facts.get("brothers", 0),
+        sisters=user_facts.get("sisters", 0),
+        grandsons=user_facts.get("grandsons", 0),
+        granddaughters=user_facts.get("granddaughters", 0),
+        grandfather=user_facts.get("paternal_grandfather", 0),
+        grandmother=user_facts.get("paternal_grandmother", 0)
     )
 
-    inheritance_results = inheritance_system.compute_inheritance()
-    print(f"🔍 Debug: Computed Inheritance Results = {inheritance_results}")
-    # inheritance_results = inheritance_system.compute_inheritance()
-    json_result = json.dumps(inheritance_results)
-    results_for_db = inheritance_system.get_results_for_db()
-    context_info = """
-Islamic Inheritance System is based on the Quranic guidelines for the distribution of wealth among heirs. The rules are designed to ensure fair and just distribution of assets according to Islamic principles. The system considers various factors such as the presence of parents, spouses, children, siblings, and other relatives to determine the inheritance shares. In cases where the default distribution does not apply, the system provides for the allocation of residual shares to the remaining heirs. The system also accounts for any specific bequests (Wasiya) made by the deceased. The results of the inheritance calculation are presented in a structured decision tree and a pie chart for better visualization and understanding."""
-    
-    output = {
-        "json_result": json_result,
-        "results_for_db": results_for_db,
-        "context_info": context_info
-    }
+    print("✅ InheritanceSystem initialized successfully.")
 
-    print(json.dumps(output))
+    inheritance_results = inheritance_system.compute_inheritance()
+    print(f"✅ Computed Inheritance Results: {inheritance_results}")
+
+    json_result = inheritance_results
+    results_for_db = inheritance_system.get_results_for_db()
+    print(f"✅ Results for DB: {results_for_db}")
+
+    context_info = "Islamic Inheritance System explanation text..."
+
+print("✅ Islamic Inheritance Script finished successfully.")
