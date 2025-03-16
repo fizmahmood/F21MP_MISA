@@ -1,5 +1,6 @@
 import mysql.connector
 import os
+import sys
 
 def connect_db():
     """Establish connection to MySQL database."""
@@ -69,25 +70,27 @@ def delete_script_file(file_name):
 
 # Example Usage: Store 'Islamic_RBS.py' in the database
 if __name__ == "__main__":
-    # backend_directory = "backend"  # Update with the actual path of your scripts
-    # system_name = "Islamic Rule-Based System"
-    # file_name = "Islamic_RBS.py"  # Change this for other scripts
-    # file_path = os.path.join(backend_directory, file_name)
 
-    # if os.path.exists(file_path):
-    #     store_script(file_path, system_name)
-    # else:
-    #     print(f"❌ Error: File '{file_path}' does not exist!")
-# Get the current directory
+    if len(sys.argv) < 3:
+        print("Usage: python3 InheritanceStorage.py <script_filename> <system_name>")
+        sys.exit(1)
+
+    file_name = sys.argv[1]
+    system_name = " ".join(sys.argv[2:]).title()
+
+   
     current_directory = os.getcwd()
+    script_directory = os.path.join(current_directory, "DBLogicScripts")
     print(f"\n📂 Current Directory: {current_directory}")
+    print(f"📂 Script Directory: {script_directory}")
+
 
     # Ask the user for input
-    file_name = input("Enter the script filename (e.g., Islamic_RBS.py): ").strip()
-    system_name = input("Enter the system name (e.g., Islamic Rule-Based System): ").strip()
+    # file_name = input("Enter the script filename (e.g., Islamic_RBS.py): ").strip()
+    # system_name = input("Enter the system name (e.g., Islamic Rule-Based System): ").strip()
 
     # Construct the file path
-    file_path = os.path.join(current_directory, file_name)
+    file_path = os.path.join(script_directory, file_name)
 
     # Check if file exists before proceeding
     if os.path.exists(file_path):
@@ -96,32 +99,6 @@ if __name__ == "__main__":
         print(f"❌ Error: File '{file_path}' does not exist! Please check the filename and try again.")
     
     # Delete script 
-    delete_choice = input(f"Do you want to delete '{file_name}' from the system? (yes/no): ").strip().lower()
-    if delete_choice == "yes":
-        delete_script_file(file_name)
-
-
-    # print("\n📂 Script Management System")
-    # print("1. Store a script in the database")
-    # print("2. Delete a script from the system")
-    
-    # while True:
-    #     choice = input("\nEnHiter your choice (1 or 2): ").strip()
-    #     if choice in ["1", "2"]:
-    #         break
-    #     else:
-    #         print("❌ Invalid choice! Please enter 1 or 2.")
-
-    # if choice == "1":
-    #     file_name = input("Enter the script filename (e.g., Islamic_RBS.py): ").strip()
-    #     system_name = input("Enter the system name (e.g., Islamic Rule-Based System): ").strip()
-    #     file_path = os.path.join(os.getcwd(), file_name)
-
-    #     if os.path.exists(file_path):
-    #         store_script(file_path, system_name)
-    #     else:
-    #         print(f"❌ Error: File '{file_name}' does not exist! Please check the filename and try again.")
-
-    # elif choice == "2":
-    #     file_name = input("Enter the script filename to delete (e.g., Islamic_RBS.py): ").strip()
+    # delete_choice = input(f"Do you want to delete '{file_name}' from the system? (yes/no): ").strip().lower()
+    # if delete_choice == "yes":
     #     delete_script_file(file_name)

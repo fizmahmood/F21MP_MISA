@@ -211,7 +211,8 @@ def safe_execute_script(user_id, system_name):
             "super": super,
             "map": map,
             "filter": filter,
-            "zip": zip
+            "zip": zip,
+            "vars": vars
         }
 
         # ✅ Safe execution namespace (allows necessary imports)

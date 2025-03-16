@@ -641,11 +641,11 @@ if __name__ == "__main__":
 
     # Extract `facts_id`
     facts_id = user_data["facts_id"]
-    print(f"🔍 Debug: Received user_facts = {user_facts}")
+    # print(f"🔍 Debug: Received user_facts = {user_facts}")
 
-    if "error" in user_facts:
-        print(f"❌ Error: {user_facts['error']}")
-        sys.exit(1)
+    # if "error" in user_facts:
+    #     print(f"❌ Error: {user_facts['error']}")
+    #     sys.exit(1)
     
 
     # # Find InheritanceSystem ID (Islamic System)
