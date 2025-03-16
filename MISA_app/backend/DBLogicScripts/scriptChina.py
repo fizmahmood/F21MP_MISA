@@ -1,4 +1,4 @@
-#DB Logic for China Inheritance System
+#DB Logic Script for China Inheritance Calculation
 import sys
 import json
 from decimal import Decimal
@@ -82,10 +82,6 @@ class InheritanceSystem:
             "blocked_heirs": {}
         }
 
-        # direct_heirs = {"father", "mother", "husband", "wife", "paternal_grandfather",
-        #             "paternal_grandmother", "maternal_grandfather", "maternal_grandmother"}
-
-
 
         # ✅ Step 1: Process Heirs
         for heir, amount in self.results.items():
@@ -119,56 +115,7 @@ class InheritanceSystem:
 
         return results_for_db
 
-    # def get_results_for_db(self):
-    #     """Return inheritance distribution in a format suitable for database storage."""
-        
-    #     results_for_db = {
-    #         "original_net_worth": float(self.original_net_worth),  # Convert Decimal to float
-    #         "net_worth": float(self.net_worth),
-    #         "will": float(self.results.get("will", 0)),  # Ensure will is included
-    #         "total_distributed": sum(value for key, value in self.results.items() if key != "will"),
-    #         "remaining_residue": float(self.residue),
-    #         "heirs": [],
-    #         "blocked_heirs": {}
-    #     }
-
-    #     # ✅ List of heirs who should **not** have "each_" prefix
-    #     direct_heirs = {"father", "mother", "husband", "wife", "paternal_grandfather",
-    #                     "paternal_grandmother", "maternal_grandfather", "maternal_grandmother"}
-
-    #     for heir, amount in self.results.items():
-    #         if heir == "will":
-    #             continue  # Skip will from direct heir listing
-
-    #         # ✅ First, assign base_heir properly
-    #         base_heir = heir.replace("each_", "")  # Strip "each_" prefix for all heirs
-
-    #         # ✅ Then, check if it should retain "each_"
-    #         if base_heir not in direct_heirs:
-    #             base_heir = heir  # Restore "each_" for non-direct heirs
-
-    #         # ✅ Fetch correct count for heirs (Handles singular/plural)
-    #         count_attr = f"{base_heir}s" if f"{base_heir}s" in vars(self) else base_heir
-    #         count = getattr(self, count_attr, 1)  # Default to 1 if not found
-
-    #         # ✅ Calculate percentage
-    #         percentage = (float(amount) / float(self.original_net_worth)) * 100 if self.original_net_worth > 0 else 0
-
-    #         # ✅ Structure each heir's data
-    #         heir_data = {
-    #             "heir": base_heir,  # Properly formatted heir name
-    #             "count": count,
-    #             "amount": float(amount),  # Convert to float
-    #             "percentage": float(percentage),  # Convert to float
-    #             "explanation": self.explanations.get(heir, "No specific rule applied.")
-    #         }
-    #         results_for_db["heirs"].append(heir_data)
-
-    #     # ✅ Step 2: Process Blocked Heirs
-    #     for blocked_heir, reason in self.blocked_heirs.items():
-    #         results_for_db["blocked_heirs"][blocked_heir] = reason
-
-    #     return results_for_db
+ 
 
 #====================================== RULES ============================================
 
@@ -250,6 +197,10 @@ class InheritanceSystem:
         # Distribute shares dynamically
         for heir, count in eligible_heirs.items():
             self.fixed_shares[f"each_{heir}"] = share_per_heir
+
+#---------------------------------------------------------------------------------------------------------
+# Execution Output
+#--------------------------------------------------------------------------------------------------------
 
 
 if "error" in user_facts:

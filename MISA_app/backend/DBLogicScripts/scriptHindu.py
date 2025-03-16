@@ -7,76 +7,8 @@ import mysql.connector
 from decimal import Decimal
 
 #---------------------------------------------------------------------------------------------------------
-# DATABASE INTERACTION
+# Inheritance System
 #--------------------------------------------------------------------------------------------------------
-
-def connect_db():
-    """Establish connection to MySQL database."""
-    try:
-        connection = mysql.connector.connect(
-            host="127.0.0.1",
-            user="root",
-            password="!fg121u03",  # Update with your actual password
-            database="misa_db"
-        )
-        return connection
-    except mysql.connector.Error as err:
-        print(f"❌ Database connection error: {err}")
-        sys.exit(1)
-
-def get_user_inheritance_data(user_id):
-    """Retrieve inheritance data from the database based on user_id."""
-    connection = connect_db()
-    cursor = connection.cursor(dictionary=True)
-
-    try:
-        query = """SELECT * FROM Facts WHERE Users_user_id = %s"""
-        cursor.execute(query, (user_id,))
-        data = cursor.fetchone()
-        cursor.close()
-        connection.close()
-
-        if data:
-            return data
-        else:
-            print(f"❌ No inheritance data found for User ID: {user_id}")
-            sys.exit(1)
-
-    except mysql.connector.Error as err:
-        print(f"❌ Error fetching user data: {err}")
-        sys.exit(1)
-
-def store_results_in_db(user_id, facts_id, inheritance_system_id, results_for_db, detailed_results):
-    """Stores inheritance results in the database."""
-    connection = connect_db()
-    cursor = connection.cursor()
-
-    try:
-        json_result = json.dumps(results_for_db)  # Convert results to JSON
-        detailed_result = json.dumps(detailed_results)  # Convert detailed breakdown to JSON
-
-        query = """
-        INSERT INTO InheritanceResults (name, json_result, detailed_result, InheritanceSystem_idInheritanceSystem, Facts_id, Users_user_id)
-        VALUES (%s, %s, %s, %s, %s, %s)
-        ON DUPLICATE KEY UPDATE
-            json_result = VALUES(json_result),
-            detailed_result = VALUES(detailed_result),
-            InheritanceSystem_idInheritanceSystem = VALUES(InheritanceSystem_idInheritanceSystem),
-            Facts_id = VALUES(Facts_id)
-        """
-        values = ("Hindu Inheritance", json_result, detailed_result, inheritance_system_id, facts_id, user_id)
-
-        cursor.execute(query, values)
-        connection.commit()
-        print(f"✅ Inheritance results stored for user {user_id}.")
-
-    except mysql.connector.Error as err:
-        print(f"❌ Error inserting inheritance results: {err}")
-
-    finally:
-        cursor.close()
-        connection.close()
-
 class InheritanceSystem:
     def __init__(self, net_worth, father=0, mother=0, husband=0, wife=0,
                  sons=0, daughters=0, brothers=0, sisters=0, grandsons=0, granddaughters=0, 
@@ -242,62 +174,36 @@ class InheritanceSystem:
         # print(f"Remaining Residue: ${self.residue:,.2f}")
         # print("===============================\n")
 
-# ---------------- TEST CASE ----------------
+#---------------------------------------------------------------------------------------------------------
+# Execution Output
+#--------------------------------------------------------------------------------------------------------
 
-if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Usage: python Hindu_RBS.py <user_id>")
-        sys.exit(1)
 
-    user_id = sys.argv[1]
+if "error" in user_facts:
+    print("❌ user_facts is empty or invalid")
+    json_result = {}
+    results_for_db = {}
+    context_info = "Error: user_facts missing"
+else:
+    print(f"✅ user_facts received: {user_facts}")
 
-    # Fetch user facts
-    connection = connect_db()
-    cursor = connection.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM Facts WHERE Users_user_id = %s", (user_id,))
-    user_data = cursor.fetchone()
-    cursor.close()
-    connection.close()
-
-    if not user_data:
-        print(f"❌ No facts found for user {user_id}")
-        sys.exit(1)
-
-    # Extract `facts_id`
-    facts_id = user_data["facts_id"]
-
-    # Find InheritanceSystem ID (Hindu System)
-    connection = connect_db()
-    cursor = connection.cursor()
-    cursor.execute("SELECT idInheritanceSystem FROM InheritanceSystem WHERE system_name = %s", ("Hindu Inheritance",))
-    inheritance_system_data = cursor.fetchone()
-    cursor.close()
-    connection.close()
-
-    if not inheritance_system_data:
-        print(f"❌ No matching inheritance system found.")
-        sys.exit(1)
-
-    inheritance_system_id = inheritance_system_data[0]
-
-    # Run Inheritance Calculation
     inheritance_system = InheritanceSystem(
-        net_worth=float(user_data.get("networth", 0)),  # Convert Decimal to float
-        will=float(user_data.get("will_amount", 0)),
-        father=user_data.get("father", 0),
-        mother=user_data.get("mother", 0),
-        husband=user_data.get("husband", 0),
-        wife=user_data.get("wife", 0),
-        sons=user_data.get("sons", 0),
-        daughters=user_data.get("daughters", 0),
-        brothers=user_data.get("brothers", 0),
-        sisters=user_data.get("sisters", 0),
-        grandsons=user_data.get("grandsons", 0),
-        granddaughters=user_data.get("granddaughters", 0),
-        paternal_grandfather=user_data.get("paternal_grandfather", 0),
-        paternal_grandmother=user_data.get("paternal_grandmother", 0),
-        maternal_grandfather=user_data.get("maternal_grandfather", 0),
-        maternal_grandmother=user_data.get("maternal_grandmother", 0)
+    net_worth=float(user_facts.get("networth", 0)),  # Convert Decimal to float
+    will=float(user_facts.get("will_amount", 0)),
+    father=user_facts.get("father", 0),
+    mother=user_facts.get("mother", 0),
+    husband=user_facts.get("husband", 0),
+    wife=user_facts.get("wife", 0),
+    sons=user_facts.get("sons", 0),
+    daughters=user_facts.get("daughters", 0),
+    brothers=user_facts.get("brothers", 0),
+    sisters=user_facts.get("sisters", 0),
+    grandsons=user_facts.get("grandsons", 0),
+    granddaughters=user_facts.get("granddaughters", 0),
+    paternal_grandfather=user_facts.get("paternal_grandfather", 0),
+    paternal_grandmother=user_facts.get("paternal_grandmother", 0),
+    maternal_grandfather=user_facts.get("maternal_grandfather", 0),
+    maternal_grandmother=user_facts.get("maternal_grandmother", 0)
     )
 
     inheritance_results = inheritance_system.compute_inheritance()

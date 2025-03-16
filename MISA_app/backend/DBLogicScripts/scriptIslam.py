@@ -1,4 +1,4 @@
-#Islamic Inheritance Calculation
+#DB Logic Script for Islamic Inheritance Calculation
 import sys
 import json
 
