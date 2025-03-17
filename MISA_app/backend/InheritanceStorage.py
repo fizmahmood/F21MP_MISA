@@ -8,7 +8,7 @@ def connect_db():
         connection = mysql.connector.connect(
             # host="127.0.0.1",
             # user="root",
-            # password="!fg121u03",  # Replace with your actual password
+            # password="!fg121u03",  
             # database="misa_db"
             host = "132.145.18.222",
             user = "um2005",
@@ -68,7 +68,7 @@ def delete_script_file(file_name):
         print(f"❌ Error: File '{file_name}' does not exist!")
 
 
-# Example Usage: Store 'Islamic_RBS.py' in the database
+
 if __name__ == "__main__":
 
     if len(sys.argv) < 3:

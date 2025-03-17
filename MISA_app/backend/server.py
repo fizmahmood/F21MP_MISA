@@ -532,31 +532,6 @@ async def run_inheritance(data: dict):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-# @app.get("/get_system") 
-# async def get_system(system_name: str):
-#     """
-#     Retrieves the inheritance system script from the database.
-#     """
-#     try:
-#         logging.info(f"Fetching system details for: {system_name}")
-
-#         connection = connect_db()
-#         cursor = connection.cursor(dictionary=True)
-
-#         query = "SELECT idInheritanceSystem, system_name FROM InheritanceSystem WHERE system_name = %s"
-#         cursor.execute(query, (system_name,))
-#         result = cursor.fetchone()
-
-#         cursor.close()
-#         connection.close()
-
-#         if result and result[0]:
-#             return {"success": True, "system_script": result[0]}
-#         else:
-#             raise HTTPException(status_code=404, detail="System not found")
-
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/get_system")
 async def get_system(system_name: str = Query(..., title="System Name")):
@@ -688,48 +663,3 @@ async def get_all_results(Users_user_id: int):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=5001, reload=True)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#Using Flask
-
-# from flask import Flask, request, jsonify
-# from flask_cors import CORS
-# import subprocess
-# import json
-
-# app = Flask(__name__)
-# CORS(app)  # Enable CORS for frontend communication
-
-# @app.route('/run_inheritance', methods=['POST'])
-# def run_inheritance():
-#     try:
-#         # Get input data from frontend
-#         data = request.json  
-        
-#         # Convert data to JSON string and pass it as an argument to the script
-#         result = subprocess.run(
-#             ["python", "Islamic_RBS.py", json.dumps(data)],
-#             capture_output=True,
-#             text=True
-#         )
-        
-#         # Return script output to frontend
-#         return jsonify({"success": True, "result": result.stdout.strip()})
-    
-#     except Exception as e:
-#         return jsonify({"success": False, "error": str(e)})
-
-# if __name__ == '__main__':
-#     app.run(host='0.0.0.0', port=5000, debug=True)
