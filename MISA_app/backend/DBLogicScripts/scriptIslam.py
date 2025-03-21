@@ -11,7 +11,7 @@ from decimal import Decimal
 class InheritanceSystem:
     def __init__(self, net_worth, father=0, mother=0, husband=0, wife=0,
                  sons=0, daughters=0, brothers=0, sisters=0, grandsons=0, granddaughters=0, 
-                 grandfather=0, grandmother=0, will = 0):
+                 paternal_grandfather=0, paternal_grandmother=0, maternal_grandfather=0, maternal_grandmother=0, will = 0):
         self.original_net_worth = net_worth
         self.net_worth = net_worth
         self.father = father
@@ -24,8 +24,10 @@ class InheritanceSystem:
         self.sisters = sisters
         self.grandsons = grandsons
         self.granddaughters = granddaughters
-        self.grandfather = grandfather
-        self.grandmother = grandmother
+        self.paternal_grandfather = paternal_grandfather
+        self.paternal_grandmother = paternal_grandmother
+        self.maternal_grandfather = maternal_grandfather
+        self.maternal_grandmother = maternal_grandmother
         self.will = will
         self.fixed_shares = {}
         self.residue = 0
@@ -93,35 +95,52 @@ class InheritanceSystem:
 
     def _apply_blocking_rules(self):
         """Apply blocking rules to remove heirs who should not inherit."""
-        # self.blocked_heirs = {}  # Dictionary to store blocked heirs and reasons
+        
 
         # Brothers and sisters are blocked if father or grandfather exists
-        if self.father > 0 or self.grandfather > 0:
+        if self.father > 0 :
             if self.brothers > 0:
-                self.blocked_heirs['brothers'] = "Brothers are blocked because the father or grandfather is alive."
-                self.brothers = 0  # Block brothers
+                self.blocked_heirs['brothers'] = "Brothers are blocked because the father."
+                self.brothers = 0  
             if self.sisters > 0:
-                self.blocked_heirs['sisters'] = "Sisters are blocked because the father or grandfather is alive."
-                self.sisters = 0  # Block sisters
+                self.blocked_heirs['sisters'] = "Sisters are blocked because the father."
+                self.sisters = 0  
 
-        # Grandsons and granddaughters are blocked if the deceased has sons
-        if self.sons > 0:
+        # Grandsons and granddaughters are blocked if the deceased has children
+        if self.sons > 0 or self.daughters > 0:
+            if self.sons > 0:
+                if self.brothers > 0:
+                    self.blocked_heirs['brothers'] = "Brothers are blocked because of the presence of a son."
+                    self.brothers = 0  
+                if self.sisters > 0:
+                    self.blocked_heirs['sisters'] = "Sisters are blocked because the of the presence of a son."
+                    self.sisters = 0  
             if self.grandsons > 0:
-                self.blocked_heirs['grandsons'] = "Grandsons are blocked because the deceased has direct sons."
+                self.blocked_heirs['grandsons'] = "Grandsons are blocked because the deceased has children."
                 self.grandsons = 0  # Block grandsons
             if self.granddaughters > 0:
-                self.blocked_heirs['granddaughters'] = "Granddaughters are blocked because the deceased has direct sons."
+                self.blocked_heirs['granddaughters'] = "Granddaughters are blocked because the deceased children."
                 self.granddaughters = 0  # Block granddaughters
 
-        # Grandfather is blocked if the father is alive
-        if self.father > 0 and self.grandfather > 0:
-            self.blocked_heirs['grandfather'] = "Grandfather is blocked because the father is alive."
-            self.grandfather = 0
+        # paternal_grandfather is blocked if the father is alive
+        if self.father > 0 and (self.paternal_grandfather > 0 or self.paternal_grandmother > 0 or self.maternal_grandfather > 0 or self.maternal_grandmother > 0):
+            self.blocked_heirs['paternal_grandfather'] = "Grandfather is blocked because the father is alive."
+            self.paternal_grandfather = 0
+            self.blocked_heirs['paternal_grandmother'] = "Grandmother is blocked because the father is alive."
+            self.paternal_grandmother = 0
+            self.blocked_heirs['maternal_grandfather'] = "Grandfather is blocked because the father is alive."
+            self.maternal_grandfather = 0
+            self.blocked_heirs['maternal_grandmother'] = "Grandmother is blocked because the father is alive."
+            self.maternal_grandmother = 0
 
-        # Grandmother is blocked if mother is alive
-        if self.mother > 0 and self.grandmother > 0:
-            self.blocked_heirs['grandmother'] = "Grandmother is blocked because the mother is alive."
-            self.grandmother = 0
+        # paternal_grandmother is blocked if mother is alive
+        if self.mother > 0 and (self.paternal_grandmother > 0 or self.maternal_grandmother):
+            self.blocked_heirs['paternal_grandmother'] = "Grandmother is blocked because the mother is alive."
+            self.paternal_grandmother = 0
+            self.blocked_heirs['maternal_grandmother'] = "Grandmother is blocked because the mother is alive."
+            self.maternal_grandmother = 0
+        
+        
 
 
     def get_results_for_db(self):
@@ -223,58 +242,72 @@ class InheritanceSystem:
         # Parents
         if self.father:
             fixed_shares['father'] = self._allocate_fixed_share('father', 1 / 6)
+            self.explanations['father'] = "Father gets a fixed share of 1/6."
 
         if self.mother:
             if self.sons or self.daughters or self.grandsons or self.granddaughters:
                 fixed_shares['mother'] = self._allocate_fixed_share('mother', 1 / 6)
+                self.explanations['mother'] = "Mother gets a fixed share of 1/6 if the user has children"
             else:
                 fixed_shares['mother'] = self._allocate_fixed_share('mother', 1 / 3)
+                self.explanations['mother'] = "Mother gets a fixed share of 1/3 if the user has no children"
 
-        if self.grandfather:
-            fixed_shares['grandfather'] = self._allocate_fixed_share('grandfather', 1 / 6)
+        if self.paternal_grandfather:
+            fixed_shares['paternal_grandfather'] = self._allocate_fixed_share('paternal_grandfather', 1 / 6)
+            self.explanations['paternal_grandfather'] = "Paternal Grandfather gets 1/6."
 
-        if self.grandmother:
+        if self.paternal_grandmother:
             if self.sons or self.daughters or self.grandsons or self.granddaughters:
-                fixed_shares['grandmother'] = self._allocate_fixed_share('grandmother', 1 / 6)
+                fixed_shares['paternal_grandmother'] = self._allocate_fixed_share('paternal_grandmother', 1 / 6)
             else:
-                fixed_shares['grandmother'] = self._allocate_fixed_share('grandmother', 1 / 3)
+                fixed_shares['paternal_grandmother'] = self._allocate_fixed_share('paternal_grandmother', 1 / 3)
 
         # Spouses
         if self.husband:
             if self.sons or self.daughters:
                 fixed_shares['husband'] = self._allocate_fixed_share('husband', 1 / 4)
+                self.explanations['husband'] = "Husband gets a fixed share of 1/4 if children are present."
             else:
                 fixed_shares['husband'] = self._allocate_fixed_share('husband', 1 / 2)
+                self.explanations['husband'] = "Husband gets a fixed share of 1/2 if children are present."
 
         if self.wife:
             if self.sons or self.daughters or self.grandsons or self.granddaughters:
                 fixed_shares['wife'] = self._allocate_fixed_share('wife', 1 / 8)
+                self.explanations['wife'] = "Wife gets a fixed share of 1/8 if children are present."
             else:
                 fixed_shares['wife'] = self._allocate_fixed_share('wife', 1 / 4)
+                self.explanations['wife'] = "Wife gets a fixed share of 1/4 if children are present."
 
         # Daughters (Only if no sons)
         if self.daughters > 0 and not self.sons:
             if self.daughters == 1:
                 fixed_shares['daughters'] = self._allocate_fixed_share('daughters', 1 / 2)
+                self.explanations['daughters'] = "Only child daughter gets a fixed share of 1/2."
             else:
                 fixed_shares['daughters'] = self._allocate_fixed_share('daughters', 2 / 3)
                 self.results['each_daughter'] = fixed_shares['daughters'] / self.daughters
+                self.explanations['daughters'] = "Daughters share a fixed share of 2/3 equally."
 
         # Granddaughters (Only if no grandsons, no sons, and no daughters)
         if self.granddaughters and not self.grandsons and not self.sons and not self.daughters:
             if self.granddaughters == 1:
                 fixed_shares['granddaughters'] = self._allocate_fixed_share('granddaughters', 1 / 2)
+                self.explanations['granddaughters'] = "Only granddaughter gets a fixed share of 1/2."
             else:
                 fixed_shares['granddaughters'] = self._allocate_fixed_share('granddaughters', 2 / 3)
                 self.results['each_granddaughter'] = self.fixed_shares['granddaughters'] / self.granddaughters
+                self.explanations['granddaughters'] = "Granddaughters share a fixed share of 2/3 equally."
 
         # Sisters (Only if no brothers)
         if self.sisters and not self.brothers:
             if self.sisters == 1:
                 fixed_shares['sisters'] = self._allocate_fixed_share('sisters', 1 / 2)
+                self.explanations['sisters'] = "Only sister gets a fixed share of 1/2."
             else:
                 fixed_shares['sisters'] = self._allocate_fixed_share('sisters', 2 / 3)
                 self.results['each_sister'] = self.fixed_shares['sisters'] / self.sisters
+                self.explanations['sisters'] = "Sisters share a fixed share of 2/3 equally"
 
         # Compute total allocated before scaling
         total_fixed = sum(fixed_shares.values())
@@ -313,15 +346,15 @@ class InheritanceSystem:
         elif self.father:
             self._give_residue_to_father()
 
-        # **Grandfather gets residue if no father, children, or grandchildren exist**
-        elif self.grandfather:
+        # **paternal_grandfather gets residue if no father, children, or grandchildren exist**
+        elif self.paternal_grandfather:
             self._give_residue_to_grandfather()
 
-        # **Brothers and Sisters (if no children, father, or grandfather)**
+        # **Brothers and Sisters (if no children, father, or paternal_grandfather)**
         elif self.brothers or self.sisters:
             self._distribute_to_siblings()
 
-        # **Brothers alone (if no children, father, grandfather, or sisters)**
+        # **Brothers alone (if no children, father, paternal_grandfather, or sisters)**
         elif self.brothers:
             self._distribute_to_brothers()
 
@@ -344,8 +377,10 @@ class InheritanceSystem:
 
         if self.sons:
             self.results['each_son'] = 2 * share_per_unit
+            self.explanations['each_son'] = "Each son gets 2 portions of the a daughter's share"
         if self.daughters:
             self.results['each_daughter'] = share_per_unit
+            self.explanations['each_daughter'] = "Each daughter gets 1 portion of the residue"
 
         self.residue = 0 
 
@@ -361,35 +396,42 @@ class InheritanceSystem:
         """Distribute residue to sons only"""
         self.results['each_son'] = self.residue / self.sons
         self.residue = 0
+        self.explanations['each_son'] = "Each son gets an equal share of the residue equally."
 
     def _give_residue_to_father(self):
         """If no children or grandchildren exist, the father inherits all residue."""
         self.fixed_shares['father'] += self.residue
         self.residue = 0  # Fully distributed
+        self.explanations['father'] = "The father inherits the residue as there are no children"
 
     def _give_residue_to_grandfather(self):
-        """If no children or grandchildren exist, the grandfather inherits all residue."""
-        self.fixed_shares['grandfather'] += self.residue
+        """If no children or grandchildren exist, the paternal_grandfather inherits all residue."""
+        self.fixed_shares['paternal_grandfather'] += self.residue
         self.residue = 0
+        self.explanations['paternal_grandfather'] = "The paternal grandfather inherits the residue"
 
     def _give_residue_to_daughters(self):
         """If no sons exist, the father and daughter(s) share residue."""
         key = 'daughter' if self.daughters == 1 else 'daughters'
         self.fixed_shares[key] += self.residue
         self.residue = 0  # Fully distributed
+        self.explanations['daughters']= "The daughter(s) inherit the residue as there are no sons"
 
     def _distribute_to_siblings(self):
         """Distribute residue among brothers with a 2:1 ratio."""
         total_shares = (2 * self.brothers) + (1 * self.sisters)
         share_per_unit = self.residue / total_shares
         self.results['each_brother'] = 2 * share_per_unit if self.brothers else 0
+        self.explanations['each_brother'] = "Each brother get 2 portions of the sister's share"
         self.results['each_sister'] = 1 * share_per_unit if self.sisters else 0
+        self.explanations['each_sister'] = "Each sister gets 1 portion of the residue."
         self.residue = 0
 
     def _distribute_to_brothers(self):
         """Distribute residue to brothers only"""
         self.results['each_brother'] = self.residue / self.brothers
         self.residue = 0
+        self.explanations['each_brother']="Brothers share the residue equally"
     
     
 print("✅ Islamic Inheritance Script started...")
@@ -415,8 +457,10 @@ else:
         sisters=user_facts.get("sisters", 0),
         grandsons=user_facts.get("grandsons", 0),
         granddaughters=user_facts.get("granddaughters", 0),
-        grandfather=user_facts.get("paternal_grandfather", 0),
-        grandmother=user_facts.get("paternal_grandmother", 0)
+        paternal_grandfather=user_facts.get("paternal_grandfather", 0),
+        paternal_grandmother=user_facts.get("paternal_grandmother", 0),
+        maternal_grandfather=user_facts.get("maternal_grandfather", 0),
+        maternal_grandmother=user_facts.get("maternal_grandmother", 0)
     )
 
     print("✅ InheritanceSystem initialized successfully.")

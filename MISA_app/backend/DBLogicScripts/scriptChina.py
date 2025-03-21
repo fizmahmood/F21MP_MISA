@@ -194,7 +194,7 @@ class InheritanceSystem:
         # Calculate each heir's share
         share_per_heir = self.net_worth / total_heirs
 
-        # Distribute shares dynamically
+        # Distribute shares
         for heir, count in eligible_heirs.items():
             self.fixed_shares[f"each_{heir}"] = share_per_heir
 

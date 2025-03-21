@@ -82,7 +82,7 @@ class InheritanceSystem:
             "blocked_heirs": {}
         }
 
-        # ✅ Step 1: Process Heirs
+        # Process Heirs
         for heir, amount in self.results.items():
             if heir == "will":
                 continue  # Skip will from direct heir listing
@@ -116,6 +116,8 @@ class InheritanceSystem:
 
     def _apply_blocking_rules(self):
         """Apply blocking rules to remove heirs who should not inherit."""
+
+        #Blocking rules in the presence of direct descendants 
         if self.sons > 0 or self.daughters > 0 or self.grandsons > 0 or self.granddaughters > 0:
             if self.father > 0:
                 self.blocked_heirs["father"] = "Father is blocked due to presence of direct descendants."
@@ -156,10 +158,7 @@ class InheritanceSystem:
         
         if (self.father > 0 or self.mother > 0 or self.paternal_grandfather
             > 0 or self.paternal_grandmother > 0 or self.maternal_grandfather > 0 or self.maternal_grandmother > 0 or self.brothers > 0 or self.sisters > 0):
-            if self.father > 0:
-                if self.mother > 0:
-                    self.blocked_heirs["mother"] = "Mother is blocked because of the presence of father."
-                    self.mother = 0
+            if self.father > 0 or self.mother > 0:
                 if self.brothers > 0:
                     self.blocked_heirs["brothers"] = "Brother is blocked because of the presence of father."
                     self.brothers = 0
@@ -202,21 +201,21 @@ class InheritanceSystem:
         eligible_heirs = {}
         total_heirs = 0  # Count of all eligible heirs
 
-        # ✅ Exclude non-heir attributes
+        # Exclude non-heir attributes
         exclude_keys = {
             "original_net_worth", "net_worth", "will", "fixed_shares", "residue",
             "results", "blocked_heirs", "explanations"
         }
-        
+        #If spouse and children are present
         if self.husband > 0 and (self.sons > 0 or self.daughters > 0):
             self.fixed_shares["husband"] = self.net_worth * 1/3
             self.explanations["husband"] = "Husband inherits 1/3 of the estate, as there are direct descendants."
-            # self.net_worth -= self.net_worth * 1/4
+            
         
         if self.wife > 0 and (self.sons > 0 or self.daughters > 0):
             self.fixed_shares["wife"] = self.net_worth * 1/3
             self.explanations["wife"] = "Wife inherits 1/3 of the estate, as there are direct descendants."
-            # self.net_worth -= self.net_worth * 1/4
+            
 
         if self.husband > 0 and (self.father > 0 or self.mother > 0 or 
                                  self.paternal_grandfather or self.paternal_grandmother or self.maternal_grandfather 
