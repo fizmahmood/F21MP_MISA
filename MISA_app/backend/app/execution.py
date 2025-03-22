@@ -5,7 +5,8 @@ import sys
 import subprocess
 import traceback
 import types
-from app.database.db import get_script_from_db, fetch_user_facts
+# from app.database.db import get_script_from_db, fetch_user_facts
+from .database.db import get_script_from_db, fetch_user_facts
 
 def execute_script_from_db(user_id, system_name):
     """Fetch and execute the inheritance script for the given user."""
