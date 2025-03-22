@@ -312,7 +312,7 @@ class InheritanceSystem:
         # Compute total allocated before scaling
         total_fixed = sum(fixed_shares.values())
 
-        # Apply proportional scaling if total fixed share exceeds available estate
+        # Apply proportional scaling if total fixed share exceeds available networh
         if total_fixed > self.net_worth:
             scaling_factor = self.net_worth / total_fixed
             for heir in fixed_shares:
