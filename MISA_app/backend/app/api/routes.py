@@ -3,8 +3,8 @@ import logging
 import json
 import subprocess
 from pydantic import BaseModel
-from app.database.db import connect_db, execute_query
-from app.execution import safe_execute_script, execute_script_from_db
+from ..database.db import connect_db, execute_query
+from ..execution import safe_execute_script, execute_script_from_db
 
 router = APIRouter()
 
