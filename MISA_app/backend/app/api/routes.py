@@ -321,4 +321,19 @@ async def get_all_results(Users_user_id: int):
 
     except Exception as e:
         logging.error(f"❌ Error retrieving results: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/list_systems")
+async def list_systems():
+    """List all available inheritance systems in the database."""
+    try:
+        query = "SELECT idInheritanceSystem, system_name FROM InheritanceSystem"
+        systems = execute_query(query, fetch_all=True, dictionary=True)
+        
+        if systems:
+            return {"success": True, "systems": systems}
+        else:
+            return {"success": False, "message": "No inheritance systems found"}
+    except Exception as e:
+        logging.error(f"Error listing inheritance systems: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e)) 

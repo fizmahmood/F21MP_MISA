@@ -49,10 +49,7 @@ const HomePage: React.FC = () => {
     // facts_id: number;
     uuid: string;
   } | null>(null);
-  // const [systemName, setSystemName] = useState<{
-  //   idInheritanceSystem: number;
-  //   system_name: string;
-  // } | null>(null);
+  // const [systemName, setSystemName] = useState<string | null>(null);
   const facts_id = localStorage.getItem("facts_id");
   const [loadingSystem, setLoadingSystem] = useState<string | null>(null);
   // const [fact, setFact] = useState<{
@@ -134,10 +131,13 @@ const HomePage: React.FC = () => {
     
     // Set loading state
     setLoadingSystem(systemName);
+    // setSystemName(systemName); // Set the current system name
     
     try {
       console.log(`Requesting system details for: ${systemName}`);
-      const systemResponse = await api.get(`/get_system/${systemName}`);
+      const systemResponse = await api.get(`/get_system`, {
+        params: { system_name: systemName },
+      });
       console.log(`System response:`, systemResponse.data);
       
       if (systemResponse.data.success && user) {
@@ -169,6 +169,7 @@ const HomePage: React.FC = () => {
     } finally {
       // Clear loading state
       setLoadingSystem(null);
+      // Don't clear systemName here so it can be used if needed
     }
   };
   return (

@@ -128,3 +128,19 @@ def safe_execute_script(user_id, system_name):
     except Exception as e:
         logging.error(f"❌ Script execution failed: {str(e)}\n{traceback.format_exc()}")
         raise Exception(f"Script execution failed: {str(e)}") 
+
+def get_script_from_db(system_name):
+    """Retrieve the script content from the database based on system name."""
+    query = """
+        SELECT script_content FROM InheritanceScripts 
+        WHERE InheritanceSystem_idInheritanceSystem = (
+            SELECT idInheritanceSystem FROM InheritanceSystem 
+            WHERE system_name = %s
+        )
+    """
+    result = execute_query(query, (system_name,), fetch_one=True)
+    if not result:
+        # Add more detailed logging here
+        logging.error(f"No script found for system: {system_name}")
+        raise Exception(f"No script found for system: {system_name}")
+    return result["script_content"] 
