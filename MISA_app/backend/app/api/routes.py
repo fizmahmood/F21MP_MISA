@@ -178,7 +178,7 @@ async def get_facts_id(Users_user_id: int):
 async def update_facts(user_id: int, facts: UserFacts):
     try:
         # Check if User Facts Exist
-        query = "SELECT * FROM facts WHERE Users_user_id = %s"
+        query = "SELECT * FROM Facts WHERE Users_user_id = %s"
         existing_facts = execute_query(query, (user_id,), fetch_one=True, dictionary=True)
 
         if not existing_facts:
@@ -186,7 +186,7 @@ async def update_facts(user_id: int, facts: UserFacts):
 
         # Update Facts in Database
         query = """
-        UPDATE facts SET father=%s, mother=%s, brothers=%s, sisters=%s, 
+        UPDATE Facts SET father=%s, mother=%s, brothers=%s, sisters=%s, 
         husband=%s, wife=%s, sons=%s, daughters=%s, grandsons=%s, 
         granddaughters=%s, paternal_grandfather=%s, paternal_grandmother=%s,
         maternal_grandfather=%s, maternal_grandmother=%s, will_amount=%s, 
@@ -203,7 +203,7 @@ async def update_facts(user_id: int, facts: UserFacts):
         execute_query(query, values)
 
         # Retrieve and Return Updated Facts
-        query = "SELECT * FROM facts WHERE Users_user_id = %s"
+        query = "SELECT * FROM Facts WHERE Users_user_id = %s"
         updated_facts = execute_query(query, (user_id,), fetch_one=True, dictionary=True)
 
         logging.info(f"Updated facts for user {user_id}: {updated_facts}")
