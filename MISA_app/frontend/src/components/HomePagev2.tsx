@@ -63,73 +63,78 @@ const HomePage: React.FC = () => {
   }, [systemName, user]);
 
   const handleGenerateResults = async (selectedSystem: string) => {
-    if (!user) {
-      console.error("User data not available.");
-      return;
-    }
-
-    // Set the loading state for the clicked system
-    setLoadingSystem(selectedSystem);
-
-    try {
-      const sysResponse = await api.get(`/get_system`, {
-        params: { system_name: selectedSystem },
-      });
-
-      if (!sysResponse.data.success) {
-        console.error("System details not found:", sysResponse.data);
-        setLoadingSystem(null);
+  if (!user) {
+        console.error("User data not available.");
         return;
       }
-
-      const systemData = sysResponse.data.system;
-      console.log("Fetched system details:", systemData);
-
-      setSystemName({
-        idInheritanceSystem: systemData.idInheritanceSystem,
-        system_name: systemData.system_name,
-      });
-
-      // Delay to ensure state updates before sending the next API call
-      setTimeout(async () => {
-        try {
-          console.log(`📡 Preparing to send API request with parameters:`);
-          console.log(`   - User ID: ${user.user_id}`);
-          console.log(`   - System Name: ${systemData.system_name}`);
-          console.log(`   - Inheritance System ID: ${systemData.idInheritanceSystem}`);
-          console.log(`   - Facts ID: ${facts_id}`);
-
-          const response = await api.post("/share_inheritance", {
-            user_id: user.user_id,
-            system_name: systemData.system_name,
-            Facts_id: facts_id,
-            InheritanceSystem_id: systemData.idInheritanceSystem,
-          });
-
-          if (response.data.success) {
-            console.log(`Inheritance shared successfully for ${selectedSystem}:`, response.data);
-            navigate("/result", {
-              state: {
-                system_name: selectedSystem,
-                result: response.data.json_result,
-                details: response.data.results_for_db,
-                context_info: response.data.context_info,
-              },
-            });
-          } else {
-            console.error(`Failed to share inheritance for ${selectedSystem}:`, response);
-            setLoadingSystem(null);
-          }
-        } catch (error) {
-          console.error(`Error sharing inheritance for ${selectedSystem}:`, error);
-          setLoadingSystem(null);
+      setLoadingSystem(selectedSystem)
+  
+      try {
+        const sysResponse = await api.get(`/get_system`, {
+          params: { system_name: selectedSystem },
+        });
+  
+        if (!sysResponse.data.success) {
+          console.error("System details not found:", sysResponse.data);
+          return;
         }
-      }, 1500);
-    } catch (error) {
-      console.error(`Error fetching system details or sharing inheritance:`, error);
-      setLoadingSystem(null);
-    }
-  };
+  
+        const systemData = sysResponse.data.system; // ✅ Extract system data
+        console.log("Fetched system details:", systemData);
+  
+        // ✅ Set systemName with parsed values
+        setSystemName({
+          idInheritanceSystem: systemData.idInheritanceSystem,
+          system_name: systemData.system_name,
+        });
+  
+          InheritanceSystem_id: systemData.idInheritanceSystem,
+        // 🛑 Add a delay to ensure `systemName` state updates before sending request
+      setTimeout(async () => {
+        console.log(`📡 Preparing to send API request with parameters:`);
+        console.log(`   - User ID: ${user.user_id}`);
+        console.log(`   - System Name: ${systemData.system_name}`);
+        console.log(`   - Inheritance System ID: ${systemData.idInheritanceSystem}`);
+        console.log(`   - Facts ID: ${facts_id}`);
+        
+        // ✅ Call `share_inheritance` with the fetched system data
+        const response = await api.post("/share_inheritance", {
+          user_id: user.user_id,
+          system_name: systemData.system_name,
+          Facts_id: facts_id, // Ensure correct Facts_id is used
+          InheritanceSystem_id: systemData.idInheritanceSystem,
+        });
+        
+  
+        if (response.data.success) {
+          console.log(
+            `Inheritance shared successfully for ${selectedSystem}:`,
+            response.data
+          );
+  
+          // ✅ Navigate to Results Page and pass the results
+          navigate("/result", {
+            state: {
+              system_name: selectedSystem,
+              result: response.data.json_result,
+              details: response.data.results_for_db,
+              context_info: response.data.context_info,
+            },
+          });
+        } else {
+          console.error(
+            `Failed to share inheritance for ${selectedSystem}:`,
+            response
+          );
+        }
+        }, 1500); // Introduce a 1.5-second delay
+      } catch (error) {
+        console.error(
+          `Error fetching system details or sharing inheritance:`,
+          error
+        );
+      }
+    };
 
   return (
     <>
