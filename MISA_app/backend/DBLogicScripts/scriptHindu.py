@@ -1,9 +1,9 @@
-#   Hindu Inheritance System
+#DB Logic Script for Hindu Inheritance Calculation
 # import networkx as nx
 # import matplotlib.pyplot as plt
 import sys
 import json
-import mysql.connector
+# import mysql.connector
 from decimal import Decimal
 
 #---------------------------------------------------------------------------------------------------------

@@ -11,6 +11,36 @@ import { Container, Row, Col, Card, Button } from "react-bootstrap";
 // import { Button, Form } from "react-bootstrap";
 //import FormFacts from "./FormFacts";
 
+// Loading Button Component
+const LoadingButton = ({ 
+  systemName, 
+  currentlyLoading, 
+  onClick 
+}: { 
+  systemName: string; 
+  currentlyLoading: string | null; 
+  onClick: (systemName: string) => void;
+}) => {
+  const isLoading = currentlyLoading === systemName;
+  
+  return (
+    <Button 
+      onClick={() => onClick(systemName)}
+      variant="primary"
+      disabled={isLoading}
+    >
+      {isLoading ? (
+        <>
+          <span className="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+          <span role="status">Loading...</span>
+        </>
+      ) : (
+        "Generate Results"
+      )}
+    </Button>
+  );
+};
+
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
   // const [loading, setLoading] = useState(true);
@@ -19,11 +49,12 @@ const HomePage: React.FC = () => {
     // facts_id: number;
     uuid: string;
   } | null>(null);
-  const [systemName, setSystemName] = useState<{
-    idInheritanceSystem: number;
-    system_name: string;
-  } | null>(null);
+  // const [systemName, setSystemName] = useState<{
+  //   idInheritanceSystem: number;
+  //   system_name: string;
+  // } | null>(null);
   const facts_id = localStorage.getItem("facts_id");
+  const [loadingSystem, setLoadingSystem] = useState<string | null>(null);
   // const [fact, setFact] = useState<{
   //   user_id: number;
   //   facts_id: number;
@@ -95,109 +126,49 @@ const HomePage: React.FC = () => {
   // };
 
   useFacts(user?.user_id ?? null);
-  useEffect(() => {
-    if (!systemName || !user) return; // Ensure systemName & user are available
-
-    // Call share_inheritance API
-    api
-      .post("/share_inheritance", {
-        user_id: user.user_id,
-        system_name: systemName,
-        InheritanceSystem_id: 1, // Ensure this value exists in your database
-        Facts_id: facts_id, // Modify if necessary
-      })
-      .then((response) => {
-        if (response.data.success) {
-          console.log(
-            `Inheritance shared successfully for ${systemName}:`,
-            response.data
-          );
-          // navigate("/result",{state: {result: response.data.json_result}});
-        } else {
-          console.error(
-            `Failed to share inheritance for ${systemName}:`,
-            response
-          );
-        }
-      })
-      .catch((error) => {
-        console.error(`Error sharing inheritance for ${systemName}:`, error);
-      });
-  }, [systemName, user]);
-
-  
 
   // if (loading) return <div>Loading...</div>;
-  const handleGenerateResults = async (selectedSystem: string) => {
-    if (!user) {
-      console.error("User data not available.");
-      return;
-    }
-
+  const handleGenerateResults = async (systemName: string) => {
+    // Prevent duplicate clicks
+    if (loadingSystem === systemName) return;
+    
+    // Set loading state
+    setLoadingSystem(systemName);
+    
     try {
-      const sysResponse = await api.get(`/get_system`, {
-        params: { system_name: selectedSystem },
-      });
-
-      if (!sysResponse.data.success) {
-        console.error("System details not found:", sysResponse.data);
-        return;
-      }
-
-      const systemData = sysResponse.data.system; // ✅ Extract system data
-      console.log("Fetched system details:", systemData);
-
-      // ✅ Set systemName with parsed values
-      setSystemName({
-        idInheritanceSystem: systemData.idInheritanceSystem,
-        system_name: systemData.system_name,
-      });
-
-        InheritanceSystem_id: systemData.idInheritanceSystem,
-      // 🛑 Add a delay to ensure `systemName` state updates before sending request
-    setTimeout(async () => {
-      console.log(`📡 Preparing to send API request with parameters:`);
-      console.log(`   - User ID: ${user.user_id}`);
-      console.log(`   - System Name: ${systemData.system_name}`);
-      console.log(`   - Inheritance System ID: ${systemData.idInheritanceSystem}`);
-      console.log(`   - Facts ID: ${facts_id}`);
+      console.log(`Requesting system details for: ${systemName}`);
+      const systemResponse = await api.get(`/get_system/${systemName}`);
+      console.log(`System response:`, systemResponse.data);
       
-      // ✅ Call `share_inheritance` with the fetched system data
-      const response = await api.post("/share_inheritance", {
-        user_id: user.user_id,
-        system_name: systemData.system_name,
-        Facts_id: facts_id, // Ensure correct Facts_id is used
-        InheritanceSystem_id: systemData.idInheritanceSystem,
-      });
-      
-
-      if (response.data.success) {
-        console.log(
-          `Inheritance shared successfully for ${selectedSystem}:`,
-          response.data
-        );
-
-        // ✅ Navigate to Results Page and pass the results
-        navigate("/result", {
-          state: {
-            system_name: selectedSystem,
-            result: response.data.json_result,
-            details: response.data.results_for_db,
-            context_info: response.data.context_info,
-          },
+      if (systemResponse.data.success && user) {
+        const systemData = systemResponse.data.system_data;
+        
+        console.log(`Sending inheritance calculation request:`, {
+          user_id: user.user_id,
+          system_name: systemName,
+          InheritanceSystem_id: systemData.idInheritanceSystem,
+          Facts_id: facts_id,
         });
-      } else {
-        console.error(
-          `Failed to share inheritance for ${selectedSystem}:`,
-          response
-        );
+        
+        const response = await api.post("/share_inheritance", {
+          user_id: user.user_id,
+          system_name: systemName,
+          InheritanceSystem_id: systemData.idInheritanceSystem,
+          Facts_id: facts_id,
+        });
+        
+        console.log(`Inheritance calculation response:`, response.data);
+        
+        if (response.data.success) {
+          navigate("/result", { state: { result: response.data } });
+        }
       }
-      }, 1500); // Introduce a 1.5-second delay
     } catch (error) {
-      console.error(
-        `Error fetching system details or sharing inheritance:`,
-        error
-      );
+      console.error(`Error sharing inheritance for ${systemName}:`, error);
+      alert("An error occurred while calculating inheritance. Please try again.");
+    } finally {
+      // Clear loading state
+      setLoadingSystem(null);
     }
   };
   return (
@@ -229,12 +200,11 @@ const HomePage: React.FC = () => {
                 <Card.Text>
                   This system calculates inheritance based on Islamic laws.
                 </Card.Text>
-                <Button
-                  onClick={() => handleGenerateResults("Islamic Inheritance")}
-                  variant="primary"
-                >
-                  Generate Results
-                </Button>
+                <LoadingButton 
+                  systemName="Islamic Inheritance"
+                  currentlyLoading={loadingSystem}
+                  onClick={handleGenerateResults}
+                />
               </Card.Body>
             </Card>
           </Col>
@@ -247,12 +217,11 @@ const HomePage: React.FC = () => {
                   This system calculates inheritance based on Hindu legal
                   traditions.
                 </Card.Text>
-                <Button
-                  onClick={() => handleGenerateResults("Hindu Inheritance")}
-                  variant="primary"
-                >
-                  Generate Results
-                </Button>
+                <LoadingButton 
+                  systemName="Hindu Inheritance"
+                  currentlyLoading={loadingSystem}
+                  onClick={handleGenerateResults}
+                />
               </Card.Body>
             </Card>
           </Col>
@@ -269,12 +238,11 @@ const HomePage: React.FC = () => {
                   This system follows the Indian Succession Act for inheritance
                   distribution.
                 </Card.Text>
-                <Button
-                  onClick={() => handleGenerateResults("India Inheritance")}
-                  variant="primary"
-                >
-                  Generate Results
-                </Button>
+                <LoadingButton 
+                  systemName="India Inheritance"
+                  currentlyLoading={loadingSystem}
+                  onClick={handleGenerateResults}
+                />
               </Card.Body>
             </Card>
           </Col>
@@ -284,15 +252,14 @@ const HomePage: React.FC = () => {
               <Card.Body>
                 <Card.Title>China Inheritance</Card.Title>
                 <Card.Text>
-                  This system follows inheritance rules as per China’s legal
+                  This system follows inheritance rules as per China's legal
                   framework.
                 </Card.Text>
-                <Button
-                  onClick={() => handleGenerateResults("China Inheritance")}
-                  variant="primary"
-                >
-                  Generate Results
-                </Button>
+                <LoadingButton 
+                  systemName="China Inheritance"
+                  currentlyLoading={loadingSystem}
+                  onClick={handleGenerateResults}
+                />
               </Card.Body>
             </Card>
           </Col>
@@ -305,12 +272,11 @@ const HomePage: React.FC = () => {
                   This system follows Russian inheritance laws for property
                   distribution.
                 </Card.Text>
-                <Button
-                  onClick={() => handleGenerateResults("Russia Inheritance")}
-                  variant="primary"
-                >
-                  Generate Results
-                </Button>
+                <LoadingButton 
+                  systemName="Russia Inheritance"
+                  currentlyLoading={loadingSystem}
+                  onClick={handleGenerateResults}
+                />
               </Card.Body>
             </Card>
           </Col>
