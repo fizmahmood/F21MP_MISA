@@ -6,7 +6,7 @@ import {
   Navigate,
 } from "react-router-dom";
 import WelcomePage from "./components/WelcomePage";
-import HomePage from "./components/HomePage";
+import HomePage from "./components/HomePagev2";
 import ResultsPage from "./components/ResultsPage";
 import EditableForm from "./components/EditableForm";
 import InheritanceResults from "./components/InheritanceResults";
