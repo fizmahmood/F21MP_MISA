@@ -144,7 +144,7 @@ const HomePage: React.FC = () => {
         return;
       }
 
-      const systemData = sysResponse.data.system; // ✅ Extract system data
+      const systemData = sysResponse.data.system_data; // ✅ Extract system data
       console.log("Fetched system details:", systemData);
 
       // ✅ Set systemName with parsed values
