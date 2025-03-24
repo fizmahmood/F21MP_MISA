@@ -237,26 +237,21 @@ async def run_inheritance(data: dict):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/get_system")
-async def get_system(system_name: str = Query(..., title="System Name")):
+async def get_system(system_name: str):
     """
-    Retrieves the inheritance system details based on system_name (using query parameters).
+    Retrieve inheritance system details from the database.
     """
     try:
-        logging.info(f"Fetching system details for: {system_name}")
+        query = """SELECT * FROM InheritanceSystem WHERE system_name = %s"""
+        system = execute_query(query, (system_name,), fetch_one=True, dictionary=True)
 
-        query = "SELECT idInheritanceSystem, system_name FROM InheritanceSystem WHERE system_name = %s"
-        system_data = execute_query(query, (system_name,), fetch_one=True, dictionary=True)
-
-        if not system_data:
-            logging.warning(f"System '{system_name}' not found in database.")
-            raise HTTPException(status_code=404, detail="System not found")
-
-        logging.info(f"System details found: {system_data}")
-        return {"success": True, "system": system_data}
-
+        if system:
+            return {"success": True, "system_data": system}
+        else:
+            return {"success": False, "message": "System not found"}
     except Exception as e:
         logging.error(f"Error retrieving system: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error retrieving system: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
        
 @router.post("/share_inheritance")
 async def share_inheritance(data: dict):

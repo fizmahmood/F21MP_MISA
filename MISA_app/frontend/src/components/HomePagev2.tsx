@@ -141,7 +141,7 @@ const HomePage: React.FC = () => {
       console.log(`System response:`, systemResponse.data);
       
       if (systemResponse.data.success && user) {
-        const systemData = systemResponse.data.system_data;
+        const systemData = systemResponse.data.system;
         
         console.log(`Sending inheritance calculation request:`, {
           user_id: user.user_id,
@@ -169,7 +169,6 @@ const HomePage: React.FC = () => {
     } finally {
       // Clear loading state
       setLoadingSystem(null);
-      // Don't clear systemName here so it can be used if needed
     }
   };
   return (
