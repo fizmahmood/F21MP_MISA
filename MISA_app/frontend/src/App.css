@@ -13,7 +13,7 @@ body {
   } */
 
   .card {
-    background-color: #1e1e1e6d !important; /* Force dark background */
+    background-color: #1e1e1e93 !important; /* Force dark background */
     color: #ffffff !important; /* Force white text */
     box-shadow: 0px 4px 10px rgba(255, 255, 255, 0.476) !important; /* Force white shadow */
     border: 0.2px solid white !important;
@@ -46,3 +46,28 @@ body {
 .card, .navbar, .container, .btn {
     transition: all 0.3s ease-in-out;
   }
+
+/* Add to your CSS */
+.system-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.system-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+}
+
+.bg-gradient-primary {
+  background: linear-gradient(135deg, #4a6bff 0%, #2541b2 100%);
+}
+
+/* Add animation for loading state */
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.6; }
+  100% { opacity: 1; }
+}
+
+.system-card button:disabled {
+  animation: pulse 1.5s infinite;
+}

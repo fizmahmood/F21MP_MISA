@@ -105,7 +105,7 @@ class InheritanceSystem:
                 "count": count,
                 "amount": float(amount),  # Convert to float
                 "percentage": float(percentage),  # Convert to float
-                "explanation": self.explanations.get(heir, "No specific rule applied.")
+                "explanation": self.explanations.get(base_heir, "No specific rule applied.")
             }
             results_for_db["heirs"].append(heir_data)
 
@@ -125,27 +125,27 @@ class InheritanceSystem:
              self.husband > 0 or self.wife > 0 or self.father > 0 or self.mother > 0 ):
 
             if self.paternal_grandfather > 0:
-                self.blocked_heirs["paternal_grandfather"] = "Paternal Grandfather is blocked due to presence of direct descendants."
+                self.blocked_heirs["paternal_grandfather"] = "Paternal Grandfather is blocked due to presence of first order of heir(s) (Parents, children, or spouse)."
                 self.paternal_grandfather = 0
 
             if self.paternal_grandmother > 0:
-                self.blocked_heirs["paternal_grandmother"] = "Paternal Grandmother is blocked due to presence of direct descendants."
+                self.blocked_heirs["paternal_grandmother"] = "Paternal Grandmother is blocked due to presence of first order of heir(s) (Parents, children, or spouse)."
                 self.paternal_grandmother = 0
 
             if self.maternal_grandfather > 0:
-                self.blocked_heirs["maternal_grandfather"] = "Maternal Grandfather is blocked due to presence of direct descendants."
+                self.blocked_heirs["maternal_grandfather"] = "Maternal Grandfather is blocked due to presence of first order of heir(s) (Parents, children, or spouse)."
                 self.maternal_grandfather = 0
 
             if self.maternal_grandmother > 0:
-                self.blocked_heirs["maternal_grandmother"] = "Maternal Grandmother is blocked due to presence of direct descendants."
+                self.blocked_heirs["maternal_grandmother"] = "Maternal Grandmother is blocked due to presence of first order of heir(s) (Parents, children, or spouse)."
                 self.maternal_grandmother = 0
             
             if self.brothers > 0:
-                self.blocked_heirs["brothers"] = "Brothers are blocked due to presence of direct descendants."
+                self.blocked_heirs["brothers"] = "Brothers are blocked due to presence of first order of heir(s) (Parents, children, or spouse)."
                 self.brothers = 0
             
             if self.sisters > 0:
-                self.blocked_heirs["sisters"] = "Sisters are blocked due to presence of direct descendants."
+                self.blocked_heirs["sisters"] = "Sisters are blocked due to presence of first order of heir(s) (Parents, children, or spouse)."
                 self.sisters = 0
 
         
@@ -190,13 +190,16 @@ class InheritanceSystem:
 
         # Total number of heirs
         total_heirs = sum(eligible_heirs.values())
+        other_heirs = total_heirs - 1
 
         # Calculate each heir's share
         share_per_heir = self.net_worth / total_heirs
 
         # Distribute shares
         for heir, count in eligible_heirs.items():
+            singular_heir = heir[:-1] if heir.endswith("s") else heir
             self.fixed_shares[f"each_{heir}"] = share_per_heir
+            self.explanations[f"{heir}"] = f"{singular_heir.capitalize()} inherits equally with {other_heirs} other eligible heirs."
 
 #---------------------------------------------------------------------------------------------------------
 # Execution Output

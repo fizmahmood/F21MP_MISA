@@ -153,8 +153,13 @@ class InheritanceSystem:
                 self.sisters = 0
         
             if self.sons or self.daughters:
-                self.grandsons = 0
-                self.granddaughters = 0
+                if self.grandsons > 0:
+                    self.grandsons = 0
+                    self.blocked_heirs["grandson"] = "Grandson(s) are blocked due to presence of children"
+                if self.granddaughters > 0:
+                    self.granddaughters = 0
+                    self.blocked_heirs["granddaughter"] = "Granddaughter(s) are blocked due to presence of children"
+                
         
         if (self.father > 0 or self.mother > 0 or self.paternal_grandfather
             > 0 or self.paternal_grandmother > 0 or self.maternal_grandfather > 0 or self.maternal_grandmother > 0 or self.brothers > 0 or self.sisters > 0):
@@ -235,43 +240,69 @@ class InheritanceSystem:
 
         if self.sons > 0 or self.daughters > 0 or self.grandsons > 0 or self.granddaughters > 0:
             total_descendants = self.sons + self.daughters + self.grandsons + self.granddaughters
+            other_descendants = total_descendants - 1
             if total_descendants > 0:
                 share_per_descendant = self.residue / total_descendants
                 if self.sons > 0:
                     self.fixed_shares["each_son"] = share_per_descendant
+                    self.explanations["each_son"] = f"Son and {other_descendants} equally share 2/3 of the remaining inheritance."
                 
                 if self.daughters > 0:
                     self.fixed_shares["each_daughter"] = share_per_descendant
+                    self.explanations["each_daughter"] = f"Daughter and {other_descendants} equally share 2/3 of the remaining inheritance."
                 
                 if self.grandsons > 0:
                     self.fixed_shares["each_grandson"] = share_per_descendant
+                    self.explanations["each_grandson"] = f"Grandson and {other_descendants} equally share 2/3 of the remaining inheritance."
 
                 if self.granddaughters > 0:
                     self.fixed_shares["each_granddaughter"] = share_per_descendant
+                    self.explanations["each_granddaughter"] = f"Granddaughter and {other_descendants} equally share 2/3 of the remaining inheritance."
 
         
         if (self.father > 0 or self.mother > 0 or self.paternal_grandfather > 0 or
              self.paternal_grandmother > 0 or self.maternal_grandfather > 0 
              or self.maternal_grandmother > 0 or self.brothers > 0 or self.sisters > 0):
             total_ascendants = self.father + self.mother + self.paternal_grandfather + self.paternal_grandmother + self.maternal_grandfather + self.maternal_grandmother
+            other_ascendants = total_ascendants - 1
             if total_ascendants > 0:
                 share_per_ascendant = self.residue / total_ascendants
                 if self.father > 0:
                     self.fixed_shares["father"] = share_per_ascendant
+                    self.explanations["father"] = f"Father and {other_ascendants} equally share 1/2 of the remaining inheritance."
                 if self.mother > 0:
                     self.fixed_shares["mother"] = share_per_ascendant
+                    self.explanations["mother"] = f"Mother and {other_ascendants} equally share 1/2 of the remaining inheritance."
                 if self.paternal_grandfather > 0:
                     self.fixed_shares["paternal_grandfather"] = share_per_ascendant
+                    self.explanations["paternal_grandfather"] = f"Paternal grandfather and {other_ascendants} equally share 1/2 of the remaining inheritance."
                 if self.paternal_grandmother > 0:
                     self.fixed_shares["paternal_grandmother"] = share_per_ascendant
+                    self.explanations["paternal_grandmother"] = f"Paternal grandmother and {other_ascendants} equally share 1/2 of the remaining inheritance."
                 if self.maternal_grandfather > 0:
                     self.fixed_shares["maternal_grandfather"] = share_per_ascendant
+                    self.explanations["maternal_grandfather"] = f"Maternal grandfather and {other_ascendants} equally share 1/2 of the remaining inheritance."
                 if self.maternal_grandmother > 0:
                     self.fixed_shares["maternal_grandmother"] = share_per_ascendant
+                    self.explanations["maternal_grandmother"] = f"Maternal grandmother and {other_ascendants} equally share 1/2 of the remaining inheritance."
                 if self.brothers > 0:
                     self.fixed_shares["each_brother"] = share_per_ascendant
+                    self.explanations["each_brother"] = f"Brother and {other_ascendants} equally share 1/2 of the remaining inheritance."
                 if self.sisters > 0:
                     self.fixed_shares["each_sister"] = share_per_ascendant
+                    self.explanations["each_sister"] = f"Sister and {other_ascendants} equally share 1/2 of the remaining inheritance."
+                
+        if (self.husband > 0 or self.wife > 0) and not (self.father > 0 or self.mother > 0 or self.paternal_grandfather > 0 or
+             self.paternal_grandmother > 0 or self.maternal_grandfather > 0 
+             or self.maternal_grandmother > 0 or self.brothers > 0 or self.sisters > 0 or self.sons > 0 or self.daughters > 0 or self.grandsons > 0 or self.granddaughters > 0):
+            if self.husband > 0:
+                self.fixed_shares["husband"] = self.net_worth
+                self.explanations["husband"] = "Husband inherits everything."
+            if self.wife > 0:
+                self.fixed_shares["wife"] = self.net_worth
+                self.explanations["wife"] = "Wife inherits everything."
+                
+
 
         
 

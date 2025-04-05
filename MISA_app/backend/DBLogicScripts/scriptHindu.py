@@ -126,7 +126,7 @@ class InheritanceSystem:
         if self.sons > 0 or self.daughters > 0 or self.husband > 0 or self.wife > 0 or self.mother > 0 or self.grandsons > 0 or self.granddaughters > 0:
             for heir in blocked:
                 if getattr(self, heir) > 0:
-                    self.blocked_heirs[heir] = f"{heir.replace('_', ' ').capitalize()} is blocked due to presence of direct descendants."
+                    self.blocked_heirs[heir] = f"{heir.replace('_', ' ').capitalize()} is blocked due to presence of Class I heir(s) (Children, Spouse, Parents)."
                     setattr(self, heir, 0)
 
     def _calculate_shares(self):
@@ -160,10 +160,13 @@ class InheritanceSystem:
 
         # ✅ Step 2: Calculate equal share for each heir
         equal_share = self.net_worth / total_heirs
-
+        other_heirs = total_heirs - 1
         # ✅ Step 3: Assign inheritance to each heir
         for heir, count in eligible_heirs.items():
+            singular_heir = heir[:-1] if heir.endswith("s") else heir
             self.results[heir] = equal_share * count  # Each heir gets an equal share
+            # self.explanations[heir] = f"{heir} gets an equal share with {other_heirs} other heirs."
+            self.explanations[heir] = f"{singular_heir.capitalize()} inherits equally with {other_heirs} other eligible heirs."
             # print(f"✅ {heir.capitalize()} inherits: ${self.results[heir]:,.2f} ({count} heir(s))")
 
         # ✅ Step 4: Update total distributed amount and residue

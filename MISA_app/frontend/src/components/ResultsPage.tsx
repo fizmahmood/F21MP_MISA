@@ -2,9 +2,17 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { Bar, Pie } from "react-chartjs-2";
 // import Tree from "react-d3-tree";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { api } from "../api/api";
-import { Container, Card, Table, Button, Row, Col, Alert } from "react-bootstrap";
+import {
+  Container,
+  Card,
+  Table,
+  Button,
+  Row,
+  Col,
+  Alert,
+} from "react-bootstrap";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -15,6 +23,7 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
+import Tree from "react-d3-tree";
 
 // ✅ Register all necessary Chart.js elements
 ChartJS.register(
@@ -26,6 +35,13 @@ ChartJS.register(
   Tooltip,
   Legend
 );
+
+// Add this type declaration at the top of your file
+declare module "react-d3-tree" {
+  interface TreeProps {
+    styles?: any;
+  }
+}
 
 interface Heir {
   heir: string;
@@ -53,12 +69,56 @@ interface Facts {
   networth: number;
 }
 
+// Custom tree styling for better visibility on dark background
+const customTreeStyles = {
+  nodes: {
+    node: {
+      circle: {
+        fill: "#4CAF50", // Green fill for nodes
+        stroke: "#FFFFFF", // White border
+        strokeWidth: 2,
+      },
+      attributes: {
+        stroke: "#FFFFFF", // White text for attributes
+        fill: "#FFFFFF",
+      },
+      name: {
+        stroke: "#FFFFFF", // White text for node names
+        fill: "#FFFFFF",
+        strokeWidth: 0.5,
+        fontSize: "1.2rem",
+      },
+    },
+    leafNode: {
+      circle: {
+        fill: "#FF6384", // Pink fill for leaf nodes
+        stroke: "#FFFFFF", // White border
+        strokeWidth: 2,
+      },
+      attributes: {
+        stroke: "#FFFFFF", // White text for attributes
+        fill: "#FFFFFF",
+      },
+      name: {
+        stroke: "#FFFFFF", // White text for node names
+        fill: "#FFFFFF",
+        strokeWidth: 0.5,
+        fontSize: "1.1rem",
+      },
+    },
+  },
+  links: {
+    stroke: "#FFFFFF", // White links
+    strokeWidth: 2,
+  },
+};
+
 const ResultsPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   // const parsedResult = location.state?.result || {};
   console.log("Location state:", location.state);
-  const systemName = location.state?.system_name ;
+  const systemName = location.state?.system_name;
   const detailedResult = location.state?.details || {
     heirs: [],
     blocked_heirs: {},
@@ -67,12 +127,17 @@ const ResultsPage: React.FC = () => {
   console.log("Context: ", context_info);
   const [facts, setFacts] = useState<Facts | null>(null);
 
-
+  // Add these for tree dimensions
+  const treeContainerRef = useRef<HTMLDivElement>(null);
+  const [dimensions, setDimensions] = useState({ width: 0, height: 400 });
+  const [translate, setTranslate] = useState({ x: 0, y: 200 });
 
   // Fetch facts based on Facts_id
   useEffect(() => {
     // const factsId = location.state?.facts_id;
     const userInfo = localStorage.getItem("userInfo");
+    if (!userInfo){navigate("/welcome")}
+    
     const userin = JSON.parse(userInfo || "{}");
     const user_id = userin.user_id;
     if (!user_id) return;
@@ -89,6 +154,26 @@ const ResultsPage: React.FC = () => {
       .catch((error) => console.error("Error fetching facts:", error));
   }, [location.state?.facts_id]);
 
+  // Add this effect to calculate tree dimensions
+  useEffect(() => {
+    if (treeContainerRef.current) {
+      const { width } = treeContainerRef.current.getBoundingClientRect();
+      setDimensions({ width, height: 400 });
+      setTranslate({ x: width / 2, y: 100 });
+    }
+
+    // Add window resize handler
+    const handleResize = () => {
+      if (treeContainerRef.current) {
+        const { width } = treeContainerRef.current.getBoundingClientRect();
+        setDimensions({ width, height: 400 });
+        setTranslate({ x: width / 2, y: 200 });
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   // const [expandedIndex] = useState<number | null>(null);
 
@@ -127,6 +212,40 @@ const ResultsPage: React.FC = () => {
       },
     ],
   };
+
+  const generateDecisionTree = (
+    heirs: Heir[],
+    blockedHeirs: Record<string, string>
+  ) => {
+    const treeData: any = {
+      name: "Inheritance Decision",
+      children: [
+        {
+          name: "Eligible Heirs",
+          children: heirs.map((heir) => ({
+            name: heir.heir,
+            attributes: {
+              Amount: `$${heir.amount.toFixed(2)}`,
+              Percentage: `${heir.percentage.toFixed(2)}%`,
+            },
+          })),
+        },
+        {
+          name: "Blocked Heirs",
+          children: Object.entries(blockedHeirs).map(([heir]) => ({
+            name: heir.replace("_", " "),
+            // attributes: { Reason: reason },
+          })),
+        },
+      ],
+    };
+    return [treeData];
+  };
+
+  const decisionTreeData = generateDecisionTree(
+    detailedResult.heirs,
+    detailedResult.blocked_heirs
+  );
 
   return (
     <Container className="mt-4">
@@ -171,26 +290,68 @@ const ResultsPage: React.FC = () => {
           </Table>
         </Card.Body>
       </Card>
-
-      {/* ✅ Blocked Heirs */}
-      {Object.keys(detailedResult.blocked_heirs).length > 0 && (
-        <Card className="shadow-lg mb-4">
-          <Card.Header as="h4" className="text-center bg-danger text-white">
-            Blocked Heirs
-          </Card.Header>
-          <Card.Body>
-            <ul className="list-group">
-              {Object.entries(detailedResult.blocked_heirs).map(
-                ([heir, reason], idx) => (
-                  <li key={idx} className="list-group-item">
-                    <strong>{heir.replace("_", " ")}:</strong> {reason as string}
-                  </li>
-                )
-              )}
-            </ul>
-          </Card.Body>
-        </Card>
-      )}
+      <Row>
+        <Col md={6}>
+          {/* ✅ Blocked Heirs */}
+          {Object.keys(detailedResult.blocked_heirs).length > 0 && (
+            <Card className="shadow-lg mb-4">
+              <Card.Header as="h4" className="text-center bg-danger text-white">
+                Blocked Heirs
+              </Card.Header>
+              <Card.Body>
+                <ul className="list-group">
+                  {Object.entries(detailedResult.blocked_heirs).map(
+                    ([heir, reason], idx) => (
+                      <li key={idx} className="list-group-item bg-dark text-white">
+                        <strong>{heir.replace("_", " ")}:</strong>{" "}
+                        {reason as string}
+                      </li>
+                    )
+                  )}
+                </ul>
+              </Card.Body>
+            </Card>
+          )}
+        </Col>
+        <Col md={6}>
+          {/* ✅ Facts Table */}
+          {facts && (
+            <Card className="shadow-lg mb-4">
+              <Card.Header
+                as="h4"
+                className="text-center bg-secondary text-white"
+              >
+                Family Information
+              </Card.Header>
+              <Card.Body>
+                <Table striped bordered hover responsive className="table-dark">
+                  <thead>
+                    <tr>
+                      <th>Category</th>
+                      <th>Count</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {Object.entries(facts)
+                      .filter(
+                        ([key, value]) =>
+                          value > 0 &&
+                          key !== "facts_id" &&
+                          key !== "Users_user_id"
+                      )
+                      .map(([key, value], index) => (
+                        <tr key={index}>
+                          <td>{key.replace(/_/g, " ")}</td>
+                          <td>{value}</td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </Table>
+              </Card.Body>
+            </Card>
+          )}
+        </Col>
+      </Row>
 
       {/* ✅ Will Amount */}
       {detailedResult.will > 0 && (
@@ -198,40 +359,52 @@ const ResultsPage: React.FC = () => {
           <h4>Will Amount</h4>
           <p>
             <strong>Amount:</strong> ${detailedResult.will.toFixed(2)} (
-            {((detailedResult.will / detailedResult.original_net_worth) * 100).toFixed(2)}%)
+            {(
+              (detailedResult.will / detailedResult.original_net_worth) *
+              100
+            ).toFixed(2)}
+            %)
           </p>
           <p>
-            Maximum allowed: ${(detailedResult.original_net_worth / 3).toFixed(2)}
+            Maximum allowed: $
+            {(detailedResult.original_net_worth / 3).toFixed(2)}
           </p>
         </Alert>
       )}
-
-      {/* ✅ Facts Table */}
-      {facts && (
+      <Row>
         <Card className="shadow-lg mb-4">
-          <Card.Header as="h4" className="text-center bg-secondary text-white">
-            User Facts
+          <Card.Header as="h4" className="text-center bg-primary text-white">
+            Decision Tree
           </Card.Header>
           <Card.Body>
-            <Table striped bordered hover responsive>
-              <thead>
-                <tr>
-                  <th>Category</th>
-                  <th>Count</th>
-                </tr>
-              </thead>
-              <tbody>
-                {Object.entries(facts).map(([key, value], index) => (
-                  <tr key={index}>
-                    <td>{key.replace(/_/g, " ")}</td>
-                    <td>{value}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
+            <div
+              ref={treeContainerRef}
+              style={{
+                width: "100%",
+                height: "400px",
+                border: "1px solid #ccc",
+                overflow: "hidden",
+                backgroundColor: "lightgray",
+              }}
+            >
+              {dimensions.width > 0 && (
+                <Tree
+                  data={decisionTreeData}
+                  orientation="vertical"
+                  translate={translate}
+                  dimensions={dimensions}
+                  pathFunc="step"
+                  separation={{ siblings: 1, nonSiblings: 1.5 }}
+                  nodeSize={{ x: 200, y: 100 }}
+                  zoomable={true}
+                  styles={customTreeStyles}
+                  collapsible={false}
+                />
+              )}
+            </div>
           </Card.Body>
         </Card>
-      )}
+      </Row>
 
       {/* ✅ Charts Section */}
       <Row className="mt-4">
@@ -263,7 +436,7 @@ const ResultsPage: React.FC = () => {
 
       {/* ✅ Back to Home Button */}
       <div className="text-center mt-4">
-        <Button onClick={() => navigate("/")} variant="secondary">
+        <Button onClick={() => navigate("/home")} variant="secondary">
           Back to Home
         </Button>
       </div>
@@ -272,7 +445,6 @@ const ResultsPage: React.FC = () => {
 };
 
 export default ResultsPage;
-
 
 // import { useLocation, useNavigate } from "react-router-dom";
 // import { Bar, Pie } from "react-chartjs-2";

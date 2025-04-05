@@ -10,12 +10,11 @@ import {
   Tooltip,
   OverlayTrigger,
 } from "react-bootstrap";
-// import axios from "axios";
 import { api } from "../api/api";
 import useUserInfo from "../hooks/useUserInfo";
 import { useNavigate } from "react-router-dom";
 
-// ✅ Define the TypeScript interface for form data
+// Define the TypeScript interface for form data
 interface FormData {
   gender: string;
   married: string;
@@ -25,8 +24,8 @@ interface FormData {
   daughters: number;
   brothers: number;
   sisters: number;
-  will_amount: number;
-  networth: number;
+  will_amount: string; // updated to string
+  networth: string;    // updated to string
   husband: number;
   wife: number;
   paternal_grandfather: number;
@@ -51,8 +50,8 @@ export default function InheritanceForm() {
     daughters: 0,
     brothers: 0,
     sisters: 0,
-    will_amount: 0,
-    networth: 0,
+    will_amount: "0", // default as "0"
+    networth: "0",    // default as "0"
     husband: 0,
     wife: 0,
     paternal_grandfather: 0,
@@ -65,11 +64,11 @@ export default function InheritanceForm() {
     granddaughters: 0,
   });
 
-  const [errors, setErrors] = useState<Record<string, string>>({}); // Validation errors
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const userInfo = useUserInfo();
   const navigate = useNavigate();
 
-  // ✅ Validation Rules
+  // Validation rules arrays
   const maxFields = [
     "brothers",
     "sisters",
@@ -90,22 +89,22 @@ export default function InheritanceForm() {
     "maternal_grandmother",
   ];
 
-  // ✅ Function to render tooltips
+  // Render tooltips for extra information
   const renderTooltip = (message: string) => (
     <Tooltip id="tooltip">{message}</Tooltip>
   );
 
-  // ✅ Set `Users_user_id` when user info is loaded
+  // When userInfo changes, update the form data if desired.
   useEffect(() => {
     if (userInfo) {
       setFormData((prev) => ({
         ...prev,
-        Users_user_id: userInfo.user_id, // ✅ Ensures correct user ID
+        Users_user_id: userInfo.user_id, // Set the user id from userInfo
       }));
     }
   }, [userInfo]);
 
-  // ✅ Auto-set Wife/Husband when Gender & Marriage status change
+  // Auto-set wife/husband based on gender and marriage status
   useEffect(() => {
     setFormData((prev) => ({
       ...prev,
@@ -114,7 +113,7 @@ export default function InheritanceForm() {
     }));
   }, [formData.gender, formData.married]);
 
-  // ✅ Validate input before updating state
+  // Validate input before updating state
   const validateInput = (name: string, value: number) => {
     let errorMessage = "";
 
@@ -123,8 +122,8 @@ export default function InheritanceForm() {
     } else if (maxFields.includes(name) && (value < 0 || value > 31)) {
       errorMessage = "Must be between 0 and 30";
     } else if (
-      (moneyFields.includes(name) && value < 0) ||
-      value > 9999999999
+      moneyFields.includes(name) &&
+      (value < 0 || value > 9999999999)
     ) {
       errorMessage = "Max value is 9,999,999,999";
     }
@@ -134,28 +133,26 @@ export default function InheritanceForm() {
       [name]: errorMessage,
     }));
 
-    return errorMessage === ""; // ✅ Return true if no error
+    return errorMessage === "";
   };
 
-  // ✅ Handle input changes
+  // Handle input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
-    const numericValue = value === "" ? 0 : Number(value);
-    let updatedValue;
-
+    let updatedValue: any;
+    
     if (type === "checkbox") {
       updatedValue = checked ? 1 : 0;
-    } else if (
-      binaryFields.includes(name) ||
-      maxFields.includes(name) ||
-      moneyFields.includes(name)
-    ) {
-      updatedValue = numericValue;
+    } else if (moneyFields.includes(name)) {
+      // For money fields, store the value as string.
+      updatedValue = value;
+    } else if (binaryFields.includes(name) || maxFields.includes(name)) {
+      updatedValue = value === "" ? 0 : Number(value);
     } else {
       updatedValue = value;
     }
 
-    if (validateInput(name, numericValue)) {
+    if (validateInput(name, moneyFields.includes(name) ? Number(value) : Number(value))) {
       setFormData((prev) => ({
         ...prev,
         [name]: updatedValue,
@@ -163,22 +160,88 @@ export default function InheritanceForm() {
     }
   };
 
-  // ✅ Handle form submission
+  // Handle form submission
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("✅ Submitting Data:", formData);
+
+    // Retrieve the latest userInfo directly from localStorage
+    const storedUserInfo = localStorage.getItem("userInfo");
+    if (!storedUserInfo) {
+      console.error("User info not available in localStorage.");
+      return;
+    }
+    const parsedUserInfo = JSON.parse(storedUserInfo);
+
+    // Overwrite Users_user_id with the value from localStorage
+    // Also convert money fields to numbers for the API payload
+    const updatedFormData = {
+      ...formData,
+      Users_user_id: parsedUserInfo.user_id,
+      will_amount: Number(formData.will_amount),
+      networth: Number(formData.networth),
+    };
+
+    console.log("✅ Submitting Data:", updatedFormData);
     try {
-      // await axios.post("http://localhost:5001/store_details", formData);
-      await api.post("/store_details", formData);
-      navigate("/home"); // ✅ Redirect on success
+      await api.post("/store_details", updatedFormData);
+      navigate("/home"); // Redirect on success
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Error submitting form:", error);
+    }
+  };
+
+  // Remove leading zeros on focus
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    if (/^0+[0-9]+$/.test(value)) {
+      const newValue = value.replace(/^0+/, "");
+      setFormData((prev) => ({
+        ...prev,
+        [name]: newValue,
+      }));
+    }
+  };
+
+  // Set the field back to "0" if it is empty on blur
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    if (value.trim() === "") {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: "0",
+      }));
+    }
+  };
+
+  // onKeyDown to allow only digits
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const allowedKeys = [
+      "Backspace",
+      "Tab",
+      "ArrowLeft",
+      "ArrowRight",
+      "Delete",
+      "Home",
+      "End",
+    ];
+    if (allowedKeys.includes(e.key)) {
+      return;
+    }
+    if (!/^\d$/.test(e.key)) {
+      e.preventDefault();
+    }
+  };
+
+  // onPaste to allow only numeric input
+  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    const pastedData = e.clipboardData.getData("text");
+    if (!/^\d+$/.test(pastedData)) {
+      e.preventDefault();
     }
   };
 
   return (
     <Container fluid className="mt-4">
-      {/* 🔹 Form Section */}
       <Row className="justify-content-center mt-4">
         <Col md={8}>
           <Card className="p-4 shadow-lg">
@@ -239,7 +302,7 @@ export default function InheritanceForm() {
                 </Card.Body>
               </Card>
 
-              {/* Children */}
+              {/* Family Information */}
               <Card className="mb-3">
                 <Card.Body>
                   <h5>
@@ -285,7 +348,6 @@ export default function InheritanceForm() {
                       </Form.Group>
                     </Col>
                     <Col md={6}>
-                      {/* Is Mother Alive */}
                       <Form.Group>
                         <Form.Label>Is Mother Alive?</Form.Label>
                         <div>
@@ -334,8 +396,6 @@ export default function InheritanceForm() {
                       />
                     </div>
                   </Row>
-
-                  {/* Show Sons & Daughters only if children exist */}
                   {formData.children === "Yes" && (
                     <Row>
                       <Col md={6}>
@@ -348,6 +408,8 @@ export default function InheritanceForm() {
                             max="30"
                             value={formData.sons}
                             onChange={handleChange}
+                            onFocus={handleFocus}
+                            onBlur={handleBlur}
                             required
                           />
                           {errors.sons && (
@@ -365,18 +427,17 @@ export default function InheritanceForm() {
                             max="30"
                             value={formData.daughters}
                             onChange={handleChange}
+                            onFocus={handleFocus}
+                            onBlur={handleBlur}
                             required
                           />
                           {errors.daughters && (
-                            <div className="text-danger">
-                              {errors.daughters}
-                            </div>
+                            <div className="text-danger">{errors.daughters}</div>
                           )}
                         </Form.Group>
                       </Col>
                     </Row>
                   )}
-                  {/* Siblings */}
                   <Row>
                     <Col md={6}>
                       <Form.Group>
@@ -388,6 +449,8 @@ export default function InheritanceForm() {
                           max="30"
                           value={formData.brothers}
                           onChange={handleChange}
+                          onFocus={handleFocus}
+                          onBlur={handleBlur}
                           required
                         />
                         {errors.brothers && (
@@ -405,6 +468,8 @@ export default function InheritanceForm() {
                           max="30"
                           value={formData.sisters}
                           onChange={handleChange}
+                          onFocus={handleFocus}
+                          onBlur={handleBlur}
                           required
                         />
                         {errors.sisters && (
@@ -418,7 +483,6 @@ export default function InheritanceForm() {
 
               <Card>
                 <CardBody>
-                  {/* Net Worth & Will */}
                   <Row>
                     <Col md={6}>
                       <Form.Group className="mt-3">
@@ -438,16 +502,19 @@ export default function InheritanceForm() {
                             </span>
                           </OverlayTrigger>
                         </Form.Label>
-
                         <div className="input-group">
                           <span className="input-group-text">$</span>
                           <Form.Control
-                            type="number"
+                            type="text"
                             name="networth"
-                            min="0"
-                            max="999999999999"
                             value={formData.networth}
                             onChange={handleChange}
+                            onKeyDown={handleKeyDown}
+                            onPaste={handlePaste}
+                            onFocus={handleFocus}
+                            onBlur={handleBlur}
+                            inputMode="numeric"
+                            pattern="[0-9]*"
                             className="form-control"
                             aria-label="Networth (in dollars)"
                             required
@@ -466,7 +533,7 @@ export default function InheritanceForm() {
                           <OverlayTrigger
                             placement="top"
                             overlay={renderTooltip(
-                              "In the application, we ask for net worth and will amount; however, some inheritance-sharing frameworks impose limitations on the will amount. For instance, Islamic inheritance follows the Wasiyya rule, which allows a maximum of one-third (⅓) of the total net worth, while Brazil limits it to 50%, and other systems have their own restrictions."
+                              "Enter the amount specified in your will."
                             )}
                           >
                             <span
@@ -477,15 +544,19 @@ export default function InheritanceForm() {
                             </span>
                           </OverlayTrigger>
                         </Form.Label>
-
                         <div className="input-group">
                           <span className="input-group-text">$</span>
                           <Form.Control
-                            type="number"
+                            type="text"
                             name="will_amount"
-                            min="0"
                             value={formData.will_amount}
                             onChange={handleChange}
+                            onKeyDown={handleKeyDown}
+                            onPaste={handlePaste}
+                            onFocus={handleFocus}
+                            onBlur={handleBlur}
+                            inputMode="numeric"
+                            pattern="[0-9]*"
                             className="form-control"
                             aria-label="Will Amount (in dollars)"
                             required
@@ -493,9 +564,7 @@ export default function InheritanceForm() {
                           <span className="input-group-text">.00</span>
                         </div>
                         {errors.will_amount && (
-                          <div className="text-danger">
-                            {errors.will_amount}
-                          </div>
+                          <div className="text-danger">{errors.will_amount}</div>
                         )}
                       </Form.Group>
                     </Col>
@@ -503,7 +572,6 @@ export default function InheritanceForm() {
                 </CardBody>
               </Card>
 
-              {/* Submit Button */}
               <Button type="submit" className="btn btn-primary w-100 mt-3">
                 Save & Proceed
               </Button>
@@ -514,252 +582,3 @@ export default function InheritanceForm() {
     </Container>
   );
 }
-
-// import React, { useState } from "react";
-// import { Form } from "react-bootstrap";
-
-// // Define the type for form data
-// interface FormData {
-//   grandparents: string;
-//   gender: string;
-//   married: string;
-//   father: number;
-//   mother: number;
-//   sons: number;
-//   daughters: number;
-//   brothers: number;
-//   sisters: number;
-//   will_amount: number;
-//   networth: number;
-//   husband: number;
-//   wife: number;
-//   paternal_grandfather: number;
-//   paternal_grandmother: number;
-//   maternal_grandfather: number;
-//   maternal_grandmother: number;
-// }
-
-// export default function InheritanceForm() {
-//   const [formData, setFormData] = useState<FormData>({
-//     gender: "",
-//     married: "",
-//     father: 0,
-//     mother: 0,
-//     sons: 0,
-//     daughters: 0,
-//     brothers: 0,
-//     sisters: 0,
-//     will_amount: 0,
-//     networth: 0,
-//     husband: 0,
-//     wife: 0,
-//     paternal_grandfather: 0,
-//     paternal_grandmother: 0,
-//     maternal_grandfather: 0,
-//     maternal_grandmother: 0,
-//     grandparents: "",
-//   });
-
-//   // Handle input changes
-//   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-//     const { name, value } = e.target;
-
-//     // Define fields that should be numbers
-//     const numericFields = [
-//       "father",
-//       "mother",
-//       "sons",
-//       "daughters",
-//       "brothers",
-//       "sisters",
-//     ];
-
-//     setFormData((prevData) => ({
-//       ...prevData,
-//       [name]: numericFields.includes(name) ? Number(value) : value, // Convert only numeric fields
-//     }));
-//   };
-
-//   // Handle form submission
-//   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-//     e.preventDefault();
-//     console.log("Form Data:", formData);
-//   };
-
-//   return (
-//     <div className="container mt-4">
-//       <h2>Inheritance Information Form</h2>
-//       <Form onSubmit={handleSubmit}>
-//         {/* Gender */}
-//         <Form.Group>
-//           <Form.Label>Gender:</Form.Label>
-//           <Form.Check
-//             type="radio"
-//             label="Male"
-//             name="gender"
-//             value="Male"
-//             onChange={handleChange}
-//             required
-//           />
-//           <Form.Check
-//             type="radio"
-//             label="Female"
-//             name="gender"
-//             value="Female"
-//             onChange={handleChange}
-//             required
-//           />
-//         </Form.Group>
-
-//         {/* Is Father Alive */}
-
-//         <Form.Group>
-//           <Form.Label>Do you have grandparents?</Form.Label>
-//           <Form.Check
-//             type="radio"
-//             label="Yes"
-//             name="grandparents"
-//             value="Yes"
-//             onChange={handleChange}
-//             required
-//           />
-//           <Form.Check
-//             type="radio"
-//             label="No"
-//             name="grandparents"
-//             value="No"
-//             onChange={handleChange}
-//             required
-//           />
-//         </Form.Group>
-//         {formData.grandparents === "Yes" && (
-//           <Form.Group>
-//           <Form.Label>Select the ones that are alive</Form.Label>
-//           <Form.Check
-//             type="checkbox"
-//             label="Paternal Grandfather"
-//             name="paternal_grandfather"
-//             checked={formData.paternal_grandfather === 1}
-//             onChange={(e) =>
-//               setFormData((prev) => ({
-//                 ...prev,
-//                 paternal_grandfather: e.target.checked ? 1 : 0,
-//               }))
-//             }
-//           />
-//           <Form.Check
-//             type="checkbox"
-//             label="Paternal Grandmother"
-//             name="paternal_grandmother"
-//             checked={formData.paternal_grandmother === 1}
-//             onChange={(e) =>
-//               setFormData((prev) => ({
-//                 ...prev,
-//                 paternal_grandmother: e.target.checked ? 1 : 0,
-//               }))
-//             }
-//           />
-//           <Form.Check
-//             type="checkbox"
-//             label="Maternal Grandfather"
-//             name="maternal_grandfather"
-//             checked={formData.maternal_grandfather === 1}
-//             onChange={(e) =>
-//               setFormData((prev) => ({
-//                 ...prev,
-//                 maternal_grandfather: e.target.checked ? 1 : 0,
-//               }))
-//             }
-//           />
-//           <Form.Check
-//             type="checkbox"
-//             label="Maternal Grandmother"
-//             name="maternal_grandmother"
-//             checked={formData.maternal_grandmother === 1}
-//             onChange={(e) =>
-//               setFormData((prev) => ({
-//                 ...prev,
-//                 maternal_grandmother: e.target.checked ? 1 : 0,
-//               }))
-//             }
-//           />
-//         </Form.Group>)}
-//         {/* Are You Married */}
-//         <Form.Group>
-//           <Form.Label>Are you Married?</Form.Label>
-//           <Form.Check
-//             type="radio"
-//             label="Yes"
-//             name="married"
-//             value="Yes"
-//             onChange={handleChange}
-//             required
-//           />
-//           <Form.Check
-//             type="radio"
-//             label="No"
-//             name="married"
-//             value="No"
-//             onChange={handleChange}
-//             required
-//           />
-//         </Form.Group>
-
-//         {/* Number Inputs */}
-//         {/* Conditionally Render Sons and Daughters if Married is "Yes" */}
-//         {formData.married === "Yes" && (
-//           <>
-//             <Form.Group>
-//               <Form.Label>Number of Sons:</Form.Label>
-//               <Form.Control
-//                 type="number"
-//                 name="sons"
-//                 min="0"
-//                 value={formData.sons}
-//                 onChange={handleChange}
-//                 required
-//               />
-//             </Form.Group>
-
-//             <Form.Group>
-//               <Form.Label>Number of Daughters:</Form.Label>
-//               <Form.Control
-//                 type="number"
-//                 name="daughters"
-//                 min="0"
-//                 value={formData.daughters}
-//                 onChange={handleChange}
-//                 required
-//               />
-//             </Form.Group>
-//           </>
-//         )}
-
-//         <Form.Group>
-//           <Form.Label>Number of Brothers:</Form.Label>
-//           <Form.Control
-//             type="number"
-//             name="brothers"
-//             min="0"
-//             value={formData.brothers}
-//             onChange={handleChange}
-//             required
-//           />
-//         </Form.Group>
-
-//         <Form.Group>
-//           <Form.Label>Number of Sisters:</Form.Label>
-//           <Form.Control
-//             type="number"
-//             name="sisters"
-//             min="0"
-//             value={formData.sisters}
-//             onChange={handleChange}
-//             required
-//           />
-//         </Form.Group>
-//         <button type="submit">Save</button>
-//       </Form>
-//     </div>
-//   );
-// }

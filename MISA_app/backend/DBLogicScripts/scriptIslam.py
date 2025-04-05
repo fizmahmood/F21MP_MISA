@@ -359,8 +359,11 @@ class InheritanceSystem:
             self._distribute_to_brothers()
 
         # **Daughters get residue if no sons exist and father is alive**
-        elif self.residue > 0 and self.father and self.daughters and not self.sons:
+        elif self.residue > 0 and self.father and self.daughters and not self.sons and not (self.brothers or self.sisters):
             self._give_residue_to_daughters()
+
+        # elif self.residue > 0 and self.father and self.daughters and not self.sons:
+        #     self._give_residue_to_daughters()
 
         # **Handle any remaining residue that wasn't distributed**
         if self.residue > 0:

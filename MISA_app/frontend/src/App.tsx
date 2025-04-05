@@ -11,6 +11,7 @@ import ResultsPage from "./components/ResultsPage";
 import EditableForm from "./components/EditableForm";
 import InheritanceResults from "./components/InheritanceResults";
 import Navigation from "./components/NavBar";
+import ScrollToTop from "./components/ScrollToTop";
 // import FactsLoader from "./components/FactsLoader";
 import "./App.css";
 
@@ -34,6 +35,7 @@ const App: React.FC = () => {
   return (
     <div className={darkMode ? "dark-mode" : "light-mode"}>
     <Router>
+      <ScrollToTop />
       {/* Navigation Bar Component */}
       <Navigation /> 
       
@@ -41,7 +43,7 @@ const App: React.FC = () => {
         <Route path="/welcome" element={<WelcomePage />} />
         <Route path="/home" element={<HomePage />} />
         <Route path="/result" element={<ResultsPage />} />
-        <Route path="/form" element={<EditableForm />} />
+        <Route path="/info" element={<EditableForm />} />
         <Route path="/results" element={<InheritanceResults/>}/>
         
 
