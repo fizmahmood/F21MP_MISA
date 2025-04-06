@@ -348,7 +348,7 @@ async def log_endpoint(data: dict):
         # Get a timezone-aware UTC timestamp
         # timestamp = datetime.now(timezone.utc).isoformat()
         # Insert the log into the PerformanceRecords table
-        query = "INSERT INTO PerformanceRecords (LogDetails) VALUES (%s)"
+        query = "INSERT INTO PerformanceRecord (LogDetails) VALUES (%s)"
         execute_query(query, (log_message,))
         return {"success": True}
     except Exception as e:
