@@ -338,18 +338,18 @@ async def list_systems():
 @router.post("/log")
 async def log_endpoint(data: dict):
     """
-    Receives a performance log from the frontend and appends it to a file.
+    Receives a performance log from the frontend and stores it in the PerformanceRecords table in the database.
     Expects a JSON payload with a "logData" key.
     """
     if "logData" not in data:
         raise HTTPException(status_code=400, detail="No log data provided")
     log_message = data["logData"]
     try:
-        # timestamp = datetime.utcnow().isoformat()
-        timestamp = datetime.now(timezone.utc).isoformat()
-        # Adjust the file path as necessary
-        with open("performance_logs.txt", "a") as f:
-            f.write(f"{timestamp} - {log_message}\n")
+        # Get a timezone-aware UTC timestamp
+        # timestamp = datetime.now(timezone.utc).isoformat()
+        # Insert the log into the PerformanceRecords table
+        query = "INSERT INTO PerformanceRecords (LogDetails) VALUES (%s)"
+        execute_query(query, (log_message))
         return {"success": True}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
