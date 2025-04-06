@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, Query
 import logging
 import json
 import subprocess
+from datetime import datetime , timezone
 from pydantic import BaseModel
 from ..database.db import connect_db, execute_query
 from ..execution import safe_execute_script, execute_script_from_db
@@ -332,3 +333,23 @@ async def list_systems():
     except Exception as e:
         logging.error(f"Error listing inheritance systems: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e)) 
+    
+#= PERFORMANCE LOGGING ===========================================================================================
+@router.post("/log")
+async def log_endpoint(data: dict):
+    """
+    Receives a performance log from the frontend and appends it to a file.
+    Expects a JSON payload with a "logData" key.
+    """
+    if "logData" not in data:
+        raise HTTPException(status_code=400, detail="No log data provided")
+    log_message = data["logData"]
+    try:
+        # timestamp = datetime.utcnow().isoformat()
+        timestamp = datetime.now(timezone.utc).isoformat()
+        # Adjust the file path as necessary
+        with open("performance_logs.txt", "a") as f:
+            f.write(f"{timestamp} - {log_message}\n")
+        return {"success": True}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

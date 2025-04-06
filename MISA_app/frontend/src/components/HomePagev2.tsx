@@ -168,6 +168,19 @@ const HomePage: React.FC = () => {
   //     );
   //   }
   // };
+  const sendLogToServer = async (logMessage: string) => {
+    try {
+      const response = await api.post("/log", { logData: logMessage });
+      if (response.data.success) {
+        console.log("Log sent successfully");
+      } else {
+        console.error("Failed to send log:", response.data.message);
+      }
+    } catch (error) {
+      console.error("Error sending log:", error);
+    }
+  };
+
   const handleGenerateResults = async (selectedSystem: string) => {
     if (!user) {
       console.error("User data not available.");
@@ -224,9 +237,14 @@ const HomePage: React.FC = () => {
   
           // Record the end time just before navigating
           const endTime = performance.now();
+          const duration = endTime - startTime;
           console.log(
-            `Time taken from button click to navigation: ${endTime - startTime} ms`
+            `Time taken from button click to navigation: ${duration} ms`
           );
+  
+          // Send the performance log to the server
+          const logMessage = `Time taken execute ${selectedSystem} script: ${duration.toFixed(2)} ms`;
+          sendLogToServer(logMessage);
   
           // Navigate to the Results Page with the data
           navigate("/result", {
