@@ -93,74 +93,157 @@ const HomePage: React.FC = () => {
       });
   }, [systemName, user]);
 
+  // const handleGenerateResults = async (selectedSystem: string) => {
+  //   if (!user) {
+  //     console.error("User data not available.");
+  //     return;
+  //   }
+  //   setLoadingSystem(selectedSystem);
+
+  //   try {
+  //     const sysResponse = await api.get(`/get_system`, {
+  //       params: { system_name: selectedSystem },
+  //     });
+
+  //     if (!sysResponse.data.success) {
+  //       console.error("System details not found:", sysResponse.data);
+  //       setLoadingSystem(null);
+  //       return;
+  //     }
+
+  //     const systemData = sysResponse.data.system_data; // ✅ Extract system data
+  //     console.log("Fetched system details:", systemData);
+
+  //     // ✅ Set systemName with parsed values
+  //     setSystemName({
+  //       idInheritanceSystem: systemData.idInheritanceSystem,
+  //       system_name: systemData.system_name,
+  //     });
+
+  //     InheritanceSystem_id: systemData.idInheritanceSystem,
+  //       // 🛑 Add a delay to ensure `systemName` state updates before sending request
+  //       setTimeout(async () => {
+  //         console.log(`📡 Preparing to send API request with parameters:`);
+  //         console.log(`   - User ID: ${user.user_id}`);
+  //         console.log(`   - System Name: ${systemData.system_name}`);
+  //         console.log(
+  //           `   - Inheritance System ID: ${systemData.idInheritanceSystem}`
+  //         );
+  //         console.log(`   - Facts ID: ${facts_id}`);
+
+  //         // ✅ Call `share_inheritance` with the fetched system data
+  //         const response = await api.post("/share_inheritance", {
+  //           user_id: user.user_id,
+  //           system_name: systemData.system_name,
+  //           Facts_id: facts_id, // Ensure correct Facts_id is used
+  //           InheritanceSystem_id: systemData.idInheritanceSystem,
+  //         });
+
+  //         if (response.data.success) {
+  //           console.log(
+  //             `Inheritance shared successfully for ${selectedSystem}:`,
+  //             response.data
+  //           );
+
+  //           // ✅ Navigate to Results Page and pass the results
+  //           navigate("/result", {
+  //             state: {
+  //               system_name: selectedSystem,
+  //               result: response.data.json_result,
+  //               details: response.data.results_for_db,
+  //               context_info: response.data.context_info,
+  //             },
+  //           });
+  //         } else {
+  //           console.error(
+  //             `Failed to share inheritance for ${selectedSystem}:`,
+  //             response
+  //           );
+  //         }
+  //       }, 1500); // Introduce a 1.5-second delay
+  //   } catch (error) {
+  //     console.error(
+  //       `Error fetching system details or sharing inheritance:`,
+  //       error
+  //     );
+  //   }
+  // };
   const handleGenerateResults = async (selectedSystem: string) => {
     if (!user) {
       console.error("User data not available.");
       return;
     }
     setLoadingSystem(selectedSystem);
-
+    
+    // Record the start time when the button is clicked
+    const startTime = performance.now();
+  
     try {
       const sysResponse = await api.get(`/get_system`, {
         params: { system_name: selectedSystem },
       });
-
+  
       if (!sysResponse.data.success) {
         console.error("System details not found:", sysResponse.data);
         setLoadingSystem(null);
         return;
       }
-
-      const systemData = sysResponse.data.system_data; // ✅ Extract system data
+  
+      const systemData = sysResponse.data.system_data; // Extract system data
       console.log("Fetched system details:", systemData);
-
-      // ✅ Set systemName with parsed values
+  
+      // Set systemName with parsed values
       setSystemName({
         idInheritanceSystem: systemData.idInheritanceSystem,
         system_name: systemData.system_name,
       });
-
-      InheritanceSystem_id: systemData.idInheritanceSystem,
-        // 🛑 Add a delay to ensure `systemName` state updates before sending request
-        setTimeout(async () => {
-          console.log(`📡 Preparing to send API request with parameters:`);
-          console.log(`   - User ID: ${user.user_id}`);
-          console.log(`   - System Name: ${systemData.system_name}`);
+  
+      // Introduce a delay (if needed) before sending the next API request
+      setTimeout(async () => {
+        console.log(`📡 Preparing to send API request with parameters:`);
+        console.log(`   - User ID: ${user.user_id}`);
+        console.log(`   - System Name: ${systemData.system_name}`);
+        console.log(
+          `   - Inheritance System ID: ${systemData.idInheritanceSystem}`
+        );
+        console.log(`   - Facts ID: ${facts_id}`);
+  
+        // Call share_inheritance with the fetched system data
+        const response = await api.post("/share_inheritance", {
+          user_id: user.user_id,
+          system_name: systemData.system_name,
+          Facts_id: facts_id, // Ensure correct Facts_id is used
+          InheritanceSystem_id: systemData.idInheritanceSystem,
+        });
+  
+        if (response.data.success) {
           console.log(
-            `   - Inheritance System ID: ${systemData.idInheritanceSystem}`
+            `Inheritance shared successfully for ${selectedSystem}:`,
+            response.data
           );
-          console.log(`   - Facts ID: ${facts_id}`);
-
-          // ✅ Call `share_inheritance` with the fetched system data
-          const response = await api.post("/share_inheritance", {
-            user_id: user.user_id,
-            system_name: systemData.system_name,
-            Facts_id: facts_id, // Ensure correct Facts_id is used
-            InheritanceSystem_id: systemData.idInheritanceSystem,
+  
+          // Record the end time just before navigating
+          const endTime = performance.now();
+          console.log(
+            `Time taken from button click to navigation: ${endTime - startTime} ms`
+          );
+  
+          // Navigate to the Results Page with the data
+          navigate("/result", {
+            state: {
+              system_name: selectedSystem,
+              result: response.data.json_result,
+              details: response.data.results_for_db,
+              context_info: response.data.context_info,
+            },
           });
-
-          if (response.data.success) {
-            console.log(
-              `Inheritance shared successfully for ${selectedSystem}:`,
-              response.data
-            );
-
-            // ✅ Navigate to Results Page and pass the results
-            navigate("/result", {
-              state: {
-                system_name: selectedSystem,
-                result: response.data.json_result,
-                details: response.data.results_for_db,
-                context_info: response.data.context_info,
-              },
-            });
-          } else {
-            console.error(
-              `Failed to share inheritance for ${selectedSystem}:`,
-              response
-            );
-          }
-        }, 1500); // Introduce a 1.5-second delay
+        } else {
+          console.error(
+            `Failed to share inheritance for ${selectedSystem}:`,
+            response
+          );
+        }
+      }, 1500); // 1.5-second delay
     } catch (error) {
       console.error(
         `Error fetching system details or sharing inheritance:`,

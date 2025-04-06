@@ -14,6 +14,8 @@ import Navigation from "./components/NavBar";
 import ScrollToTop from "./components/ScrollToTop";
 // import FactsLoader from "./components/FactsLoader";
 import "./App.css";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const App: React.FC = () => {
   const userUUID = localStorage.getItem("userUUID");
@@ -56,6 +58,7 @@ const App: React.FC = () => {
         <Route path="*" element={<Navigate to={userUUID ? "/home" : "/welcome"} />} />
       </Routes>
     </Router>
+    <ToastContainer />
     </div>
   );
 };
